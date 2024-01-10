@@ -1,0 +1,27 @@
+{
+    "id": "F1FB89D6",
+    "path": null,
+    "project_path": null,
+    "type": "r_source",
+    "hash": "434581215",
+    "contents": "",
+    "dirty": false,
+    "created": 1704895900558.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "274,0",
+        "scrollLine": "220"
+    },
+    "folds": "6|23|108|0|\n11|112|96|0|\n109|18|159|0|\n160|38|217|0|\n226|54|271|0|\n277|46|328|0|\n330|48|373|0|\n",
+    "lastKnownWriteTime": 6874854182682963827,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1704895919337,
+    "read_only": false,
+    "read_only_alternatives": []
+}

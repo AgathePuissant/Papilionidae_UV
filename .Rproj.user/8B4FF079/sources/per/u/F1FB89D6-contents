@@ -1,0 +1,564 @@
+#------------------------------------------------------------
+pc = "./data/pca_embeddings_UV_match.csv"
+lvl = "sp"
+boolsis=F
+correct = F
+sympseuil = 0
+#### Prepare functions ####
+source("./code/basis_functions/match_tree.R")
+source("./code/basis_functions/get_phenotype.R")
+source('./code/basis_functions/plot_genres.R')
+
+create_distpheno <- function(meanphen, sex, view, sister=T, level = "sp", res=T, sympseuil = 0.2, sympbyhand=F){
+  
+  meanbdftemp = meanbdf[meanbdf$sex==sex & meanbdf$view==view,]
+  
+  distpheno = as.matrix(dist(meanphen))
+  distpheno = melt(distpheno)
+  
+  # distpheno = distpheno[as.numeric(distpheno$Var1) > as.numeric(distpheno$Var2), ]
+  
+  overlap = read.csv(file.path(getwd(),"data/jaccard.csv"),sep=";",row.names=1,dec=",")
+  distphylo = cophenetic.phylo(subtree)
+  distphylo <- melt(distphylo)
+  
+  if (level=="form"){
+    sis$sp1ov = str_replace(sis$sp1,"_[a-z]*_[a-z]*$","")
+    sis$sp2ov = str_replace(sis$sp2,"_[a-z]*_[a-z]*$","")
+    distpheno$Var1ov = str_replace(distpheno$Var1,"_[a-z]*_[a-z]*$","")
+    distpheno$Var2ov = str_replace(distpheno$Var2,"_[a-z]*_[a-z]*$","")
+    
+    distphylo$Var1ov = str_replace(distphylo$Var1,"_[a-z]*_[a-z]*$","")
+    distphylo$Var2ov = str_replace(distphylo$Var2,"_[a-z]*_[a-z]*$","")
+    
+  }else{
+    sis$sp1ov = sis$sp1
+    sis$sp2ov = sis$sp2
+    distpheno$Var1ov = distpheno$Var1
+    distpheno$Var2ov = distpheno$Var2
+    
+    distphylo$Var1ov=distphylo$Var1
+    distphylo$Var2ov=distphylo$Var2
+  }
+  
+  
+  distphylo2 <- data.frame("Var1ov"=distphylo$Var2ov,"Var2ov"=distphylo$Var1ov,"value"=distphylo$value)
+  # colnames(distphylo2) <- colnames(distphylo)
+  distphylo$Var1=NULL
+  distphylo$Var2=NULL
+  distphylo = rbind(distphylo,distphylo2)
+  distpheno$distphylo = distphylo[match(paste(distpheno$Var1ov,distpheno$Var2ov),paste(distphylo$Var1ov,distphylo$Var2ov)),1]
+  # distpheno=merge(distpheno,distphylo,by=c("Var1","Var2"),all.x=T)
+  
+  
+  if (res==T){
+    
+    
+    distpheno = distpheno[distpheno$distphylo>0,]
+    distpheno <- distpheno[complete.cases(distpheno),]
+    fit <- lm(distpheno$value~distpheno$distphylo)
+    # summary(fit)
+    distpheno$value <- fit$residuals
+    
+  }
+  
+  if (sister == T){
+    
+    distpheno = distpheno[match(paste(sis$sp1ov,sis$sp2ov),paste(distpheno$Var1ov,distpheno$Var2ov)),]
+    
+    distpheno$overlap = overlap[match(paste(sis$sp1ov,sis$sp2ov),paste(overlap$Var1,overlap$Var2)),3]
+    distpheno$symp = distpheno$overlap>sympseuil
+    # distpheno$symp[distpheno$overlap<sympseuil & distpheno$overlap>0] = NA
+    distpheno$dmeanb <- abs(meanbdftemp[match(sis$sp1,meanbdftemp$genresp),]$avg-meanbdftemp[match(sis$sp2,meanbdftemp$genresp),]$avg)
+    
+  }
+  
+  else{
+    distpheno$overlap = overlap[match(paste(distpheno$Var1ov,distpheno$Var2ov),paste(overlap$Var1,overlap$Var2)),3]
+    distpheno$symp = distpheno$overlap>sympseuil
+    # distpheno$symp[distpheno$overlap<sympseuil & distpheno$overlap>0] = NA
+    distpheno$dmeanb <- abs(meanbdftemp[match(distpheno$Var1ov,meanbdftemp$genresp),]$avg-meanbdftemp[match(distpheno$Var2ov,meanbdftemp$genresp),]$avg)
+  }
+  
+  # distpheno$hostplant <- (hostplant[match(sis$sp1,hostplant$genresp),]$name=="AR" & hostplant[match(sis$sp2,hostplant$genresp),]$name=="AR")
+  
+  if (sympbyhand==T){
+    symp_byhand = read.csv(file.path(getwd(),"./data/symp_byhand.csv"),sep=";",header=T)
+    
+    distpheno <- merge(distpheno, symp_byhand, by.x=c("Var1ov","Var2ov"), by.y=c("Var1","Var2"),all.x=T)
+    
+    distpheno$symp = apply(cbind(distpheno$symp.x,distpheno$symp.y), 1, function(x) if (is.na(x[1])){return(x[2])}else{return(x[1])})
+    
+  }
+  
+  # distpheno <- distpheno[(distpheno$hostplant==F & distpheno$symp==T) | (distpheno$symp==F),]
+  distpheno <- distpheno[!is.na(distpheno$symp),]
+  return(distpheno)
+}
+
+if (lvl == "form"){
+  adp=T
+}else{
+  adp = F
+}
+
+library(diverge)
+library(reshape2)
+library(ggpubr)
+library(ape)
+
+#### Prepare data ####
+
+
+list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+meanphen <- list_get_phenotype[[1]]
+data_FD <- list_get_phenotype[[2]]
+sp_data <- list_get_phenotype[[4]]
+rm(list=c("list_get_phenotype"))
+
+
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+subtree <- list_match[[1]]
+meanphen_FD <- list_match[[2]]
+
+list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+meanphen <- list_get_phenotype[[1]]
+data_FV <- list_get_phenotype[[2]]
+sp_data <- list_get_phenotype[[4]]
+rm(list=c("list_get_phenotype"))
+
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+subtree <- list_match[[1]]
+meanphen_FV <- list_match[[2]]
+
+list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+meanphen <- list_get_phenotype[[1]]
+data_MD <- list_get_phenotype[[2]]
+sp_data <- list_get_phenotype[[4]]
+rm(list=c("list_get_phenotype"))
+
+
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+subtree <- list_match[[1]]
+meanphen_MD <- list_match[[2]]
+
+list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+meanphen <- list_get_phenotype[[1]]
+data_MV <- list_get_phenotype[[2]]
+sp_data <- list_get_phenotype[[4]]
+rm(list=c("list_get_phenotype"))
+
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_MV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+subtree <- list_match[[1]]
+meanphen_MV <- list_match[[2]]
+
+meanphen_grayscale = rbind(meanphen_FD,meanphen_FV,meanphen_MD,meanphen_MV)
+data_grayscale = rbind(data_FD,data_FV,data_MD,data_MV)
+
+# sis=extract_sisters(subtree)
+
+
+##### Merge data with additional info #####
+data=data_grayscale
+meanphen = meanphen_grayscale
+
+meanb <- read.csv("./data/meanb.csv", sep=";")
+meanb_ant <- read.csv("./data/meanb_ant.csv", sep=";")
+meanb_post <- read.csv("./data/meanb_post.csv", sep=";")
+contrast_im <- read.csv("./data/contrast_im.csv", sep=";")
+AR <- read.csv("./data/data_AR_all.csv", sep=";")
+# hostplant <- read.csv("C:/Users/Agathe/Mon Drive/Données/hostplant.csv", sep=";")
+
+library(tidyverse)
+# hostplant = hostplant %>%
+#   pivot_longer(cols = c(2:13)) %>% 
+#   filter(value == 1)
+# hostplant$Species <- str_replace(hostplant$Species,"[0-9]","")
+# hostplant<-hostplant[!duplicated(hostplant$Species),]
+# hostplant$genresp <- hostplant$Species
+
+meanbdf <- merge(data,meanb, by = c("id","view"))
+meanbdf_ant <- merge(data,meanb_ant, by = c("id","view"))
+meanbdf_post <- merge(data,meanb_post, by = c("id","view"))
+# hostplant <- merge(data,hostplant, by = c("genresp"))
+contrastdf <- merge(data,contrast_im, by = c("id","view"))
+
+meanbdf =meanbdf %>% 
+  group_by(genresp,view,sex) %>%
+  summarise(avg = mean(meanb))
+
+meanbdf_ant =meanbdf_ant %>% 
+  group_by(genresp,view,sex) %>%
+  summarise(avg = mean(meanb_ant))
+
+meanbdf_post =meanbdf_post %>% 
+  group_by(genresp,view,sex) %>%
+  summarise(avg = mean(meanb))
+
+contrastdf =contrastdf %>% 
+  group_by(genresp,view,sex) %>%
+  summarise(avg = mean(contrast))
+
+AR$genresp = data[match(AR$id,data$id),]$genresp
+AR$sex = data[match(AR$id,data$id),]$sex
+AR = AR[complete.cases(AR),]
+
+ARdf = AR %>% 
+  group_by(genresp,view,sex) %>%
+  summarise(avgAR = mean(l.w))
+
+AR = AR %>% 
+  group_by(id,view,sex) %>%
+  summarise(l.w = mean(l.w))
+
+meanphen_FD_grayscale = meanphen_FD
+meanphen_FV_grayscale = meanphen_FV
+meanphen_MD_grayscale = meanphen_MD
+meanphen_MV_grayscale = meanphen_MV
+
+#------------------------------------------------------------
+
+oritree = read.tree("./data/Papilionidae_MCC_clean.tre")
+# sis=extract_sisters(oritree)
+sis=extract_sisters(subtree)
+
+
+#------------------------------------------------------------
+#### Compare distance grayscale between symp and allo ####
+
+MD = create_distpheno(meanphen_MD,"M","D", level=lvl, res=correct, sympseuil = sympseuil)
+MD$sex="M"
+MD$view="D"
+MV = create_distpheno(meanphen_MV,"M","V", level=lvl, res=correct, sympseuil = sympseuil)
+MV$sex="M"
+MV$view="V"
+FD = create_distpheno(meanphen_FD,"F","D", level=lvl, res=correct, sympseuil = sympseuil)
+FD$sex="F"
+FD$view="D"
+FV = create_distpheno(meanphen_FV,"F","V", level=lvl, res=correct, sympseuil = sympseuil)
+FV$sex="F"
+FV$view="V"
+
+M = rbind(MD,MV)
+Fem = rbind(FD,FV)
+
+MF_grayscale=rbind(M,Fem)
+MF_grayscale$type = "grayscale"
+# 
+# ggplot(data=M, aes(x=symp, y=value))+
+#   geom_boxplot(fill ="lightblue", outlier.shape = NA)+
+#   geom_jitter(alpha=0.5, color = "blue")+
+#   theme_classic()+
+#   stat_compare_means()+
+#   ggtitle("Male UV distance")
+# 
+# ggplot(data=Fem, aes(x=symp, y=value))+
+#   geom_boxplot(fill="lightpink", outlier.shape = NA)+
+#   geom_jitter(alpha=0.5, color = "magenta")+
+#   theme_classic()+
+#   stat_compare_means()+
+#   ggtitle("Female UV distance")
+# 
+# ggplot(data=MF_grayscale, aes(x=symp, y=value))+
+#   geom_boxplot(fill="lightyellow", outlier.shape= NA)+
+#   geom_jitter(alpha=0.5, color = "gold")+
+#   theme_classic()+
+#   stat_compare_means()+
+#   ggtitle("All UV distance")
+
+summary(MD$symp)
+
+
+
+#------------------------------------------------------------
+
+
+
+pc="./data/pca_embeddings_match.csv"
+######### Same for visible : data preparation ###############
+source("./code/basis_functions/get_phenotype_old.R")
+# source("./code/basis_functions/match_tree.R")
+
+
+# pc="./data/pca_embeddings_grayscalevisible.csv"
+
+list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_old.csv",path_coords = pc, reduce_dataset=T)
+meanphen <- list_get_phenotype[[1]]
+data_FD <- list_get_phenotype[[2]]
+sp_data <- list_get_phenotype[[4]]
+rm(list=c("list_get_phenotype"))
+
+
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+subtree <- list_match[[1]]
+meanphen_FD <- list_match[[2]]
+
+list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_old.csv",path_coords = pc, reduce_dataset=T)
+meanphen <- list_get_phenotype[[1]]
+data_FV <- list_get_phenotype[[2]]
+sp_data <- list_get_phenotype[[4]]
+rm(list=c("list_get_phenotype"))
+
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+subtree <- list_match[[1]]
+meanphen_FV <- list_match[[2]]
+
+list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_old.csv",path_coords = pc, reduce_dataset=T)
+meanphen <- list_get_phenotype[[1]]
+data_MD <- list_get_phenotype[[2]]
+sp_data <- list_get_phenotype[[4]]
+rm(list=c("list_get_phenotype"))
+
+
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+subtree <- list_match[[1]]
+meanphen_MD <- list_match[[2]]
+
+list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_old.csv",path_coords = pc, reduce_dataset=T)
+meanphen <- list_get_phenotype[[1]]
+data_MV <- list_get_phenotype[[2]]
+sp_data <- list_get_phenotype[[4]]
+rm(list=c("list_get_phenotype"))
+
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_MV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+subtree <- list_match[[1]]
+meanphen_MV <- list_match[[2]]
+
+meanphen = rbind(meanphen_FD,meanphen_FV,meanphen_MD,meanphen_MV)
+data = rbind(data_FD,data_FV,data_MD,data_MV)
+
+#------------------------------------------------------------
+#### Compare distance vis between symp and allo ####
+
+
+MD = create_distpheno(meanphen_MD,"M","D", level=lvl, res=correct, sympseuil = sympseuil)
+MD$sex="M"
+MD$view="D"
+MV = create_distpheno(meanphen_MV,"M","V", level=lvl, res=correct, sympseuil = sympseuil)
+MV$sex="M"
+MV$view="V"
+FD = create_distpheno(meanphen_FD,"F","D", level=lvl, res=correct, sympseuil = sympseuil)
+FD$sex="F"
+FD$view="D"
+FV = create_distpheno(meanphen_FV,"F","V", level=lvl, res=correct, sympseuil = sympseuil)
+FV$sex="F"
+FV$view="V"
+
+M = rbind(MD,MV)
+Fem = rbind(FD,FV)
+
+MF_visible=rbind(M,Fem)
+MF_visible$type = "visible"
+
+
+# ggplot(data=M, aes(x=symp, y=value))+
+#   geom_boxplot(fill ="lightblue", outlier.shape = NA)+
+#   geom_jitter(alpha=0.5, color = "blue")+
+#   theme_classic()+
+#   stat_compare_means()+
+#   ggtitle("Male visible distance")
+# 
+# ggplot(data=Fem, aes(x=symp, y=value))+
+#   geom_boxplot(fill="lightpink", outlier.shape = NA)+
+#   geom_jitter(alpha=0.5, color = "magenta")+
+#   theme_classic()+
+#   stat_compare_means()+
+#   ggtitle("Female visible distance")
+# 
+# ggplot(data=MF_visible, aes(x=symp, y=value))+
+#   geom_boxplot(fill="lightyellow", outlier.shape= NA)+
+#   geom_jitter(alpha=0.5, color = "gold")+
+#   theme_classic()+
+#   stat_compare_means()+
+#   ggtitle("All visible distance")
+
+#------------------------------------------------------------
+
+sex="M"
+
+if (sex=="M"){
+  meanphen_D_vis = meanphen_MD
+  meanphen_V_vis = meanphen_MV
+  meanphen_D_grayscale = meanphen_MD_grayscale
+  meanphen_V_grayscale = meanphen_MV_grayscale
+  meanphen_D_grayscale = meanphen_D_grayscale[rownames(meanphen_V_grayscale),,drop=F]
+  meanphen_V_grayscale = meanphen_V_grayscale[rownames(meanphen_D_grayscale),,drop=F]
+  meanphen_D_grayscale = meanphen_D_grayscale[complete.cases(meanphen_D_grayscale),,drop=F]
+  meanphen_V_grayscale = meanphen_V_grayscale[complete.cases(meanphen_V_grayscale),,drop=F]
+}else
+{
+  meanphen_D_vis = meanphen_FD
+  meanphen_V_vis = meanphen_FV
+  meanphen_D_grayscale = meanphen_FD_grayscale
+  meanphen_V_grayscale = meanphen_FV_grayscale
+}
+
+#Différence DV visible et UV
+
+range01 <- function(x){(x-min(x))/(max(x)-min(x))}
+
+DV_visible = as.data.frame(range01(diag(as.matrix(dist(meanphen_D_vis, meanphen_V_vis)))))
+colnames(DV_visible)<-"DV_vis"
+DV_grayscale = as.data.frame(range01(diag(as.matrix(dist(meanphen_D_grayscale, meanphen_V_grayscale)))))
+colnames(DV_grayscale)<-"DV_grayscale"
+
+library(ggtree)
+
+p<-ggtree(subtree)
+
+p<- gheatmap(p,data=DV_visible, offset=5.8, width=.05)+
+  scale_fill_viridis_c(option = "magma",na.value="white")
+
+library(ggnewscale)
+p <- p + new_scale_fill()
+gheatmap(p,data=DV_grayscale,offset=.8,width=.05)+ 
+  scale_fill_viridis_c(option = "magma", na.value="white")
+
+library(geomorph)
+
+#### Rates of evolution MF ####
+res.comp_grayscale = compare.multi.evol.rates(as.matrix(cbind(meanphen_MD_grayscale,meanphen_MV_grayscale,meanphen_FD_grayscale,meanphen_FV_grayscale)),
+                                              subtree,
+                                              gp=c(rep("MD",length(meanphen_MD_grayscale)),
+                                                   rep("MV",length(meanphen_MV_grayscale)),
+                                                   rep("FD",length(meanphen_FD_grayscale)),
+                                                   rep("FV",length(meanphen_FV_grayscale))))
+res.comp_grayscale
+
+#onlymales
+subtreemales = match.phylo.data(subtree,meanphen_MD_grayscale)$phy
+res.comp_grayscale = compare.multi.evol.rates(as.matrix(cbind(meanphen_MD_grayscale,meanphen_MV_grayscale)),
+                                              subtreemales,
+                                              gp=c(rep("MD",length(meanphen_MD_grayscale)),
+                                                   rep("MV",length(meanphen_MV_grayscale))))
+res.comp_grayscale
+#
+
+#onlyfemales
+meanphen_FD_grayscale = meanphen_FD_grayscale[rownames(meanphen_FV_grayscale),,drop=F]
+subtreefemales = match.phylo.data(subtree,meanphen_FD_grayscale)$phy
+res.comp_grayscale = compare.multi.evol.rates(as.matrix(cbind(meanphen_FD_grayscale,meanphen_FV_grayscale)),
+                                              subtreefemales,
+                                              gp=c(rep("FD",length(meanphen_FD_grayscale)),
+                                                   rep("FV",length(meanphen_FV_grayscale))))
+res.comp_grayscale
+#
+
+res.comp_grayscale$pairwise.pvalue
+
+res.comp_vis = compare.multi.evol.rates(as.matrix(cbind(meanphen_MD,meanphen_MV,meanphen_FD,meanphen_FV)),
+                                        subtree,
+                                        gp=c(rep("MD",length(meanphen_MD)),
+                                             rep("MV",length(meanphen_MV)),
+                                             rep("FD",length(meanphen_FD)),
+                                             rep("FV",length(meanphen_FV))))
+res.comp_vis
+
+res.comp_vis$pairwise.pvalue
+
+
+########
+
+#### Rates of evolution DV ####
+res.comp_grayscale = compare.multi.evol.rates(as.matrix(cbind(meanphen_D_grayscale,meanphen_V_grayscale)),subtree,gp=c(rep("D",length(meanphen_D_grayscale)),rep("V",length(meanphen_V_grayscale))))
+res.comp_grayscale
+
+res.comp_vis = compare.multi.evol.rates(as.matrix(cbind(meanphen_D_vis,meanphen_V_vis)),subtree,gp=c(rep("D",length(meanphen_D_vis)),rep("V",length(meanphen_V_vis))))
+res.comp_vis
+
+########
+
+res_vis <- phylo.integration(meanphen_D_vis, meanphen_D_grayscale, subtree)
+res_vis
+
+res_vis <- phylo.integration(meanphen_D_grayscale, meanphen_V_grayscale, subtree)
+res_vis
+
+res_diff <- phylo.integration(DV_visible, DV_grayscale, subtree)
+res_diff
+
+#### RRphylo ####
+
+library(RRphylo)
+source("./code/basis_functions/f_RR.R")
+
+DV_visible = as.data.frame(diag(as.matrix(dist(meanphen_D_vis, meanphen_V_vis))))
+colnames(DV_visible)<-"DV_vis"
+DV_grayscale = as.data.frame(diag(as.matrix(dist(meanphen_D_grayscale, meanphen_V_grayscale))))
+colnames(DV_grayscale)<-"DV_grayscale"
+rownames(DV_grayscale) <- rownames(meanphen_D_grayscale)
+
+DV_diff = abs(DV_visible-DV_grayscale)
+
+RR <- RRphylo(tree = match.phylo.data(subtree, meanphen_V_grayscale)$phy, y=meanphen_V_grayscale)
+plot_shifts(RR,match.phylo.data(subtree, meanphen_V_grayscale)$phy)
+plot_rates(RR,match.phylo.data(subtree, meanphen_V_grayscale)$phy, log_tr = T)
+
+##### phytools evol rate ####
+whatyouwant <- DV_grayscale$DV_grayscale
+names(whatyouwant) <- rownames(DV_grayscale)
+contMap(match.phylo.data(subtree,whatyouwant)$phy, whatyouwant)
+
+resBM <- multirateBM(match.phylo.data(subtree,whatyouwant)$phy,whatyouwant, parallel = T)
+## generate plotting object
+obj<-plot(resBM,plot=FALSE)
+obj
+
+## change color (needs viridisLite package)
+obj<-setMap(obj,viridisLite::viridis(n=8))
+
+whatyouwant <- DV_visible$DV_vis
+names(whatyouwant) <- rownames(DV_visible)
+
+resBM_vis <- multirateBM(subtree,whatyouwant, parallel = T)
+## generate plotting object
+obj_vis<-plot(resBM_vis,plot=FALSE)
+obj_vis
+
+obj_vis<-setMap(obj_vis,viridisLite::viridis(n=8))
+
+## graph
+plot(obj)
+plot(obj_vis)
+
+layout(matrix(1:3,1,3),widths=c(0.39,0.22,0.39))
+plot(obj,lwd=6,ftype="off",outline=TRUE,fsize=c(0,1.2))
+plot.new()
+plot.window(xlim=c(-0.1,0.1),
+            ylim=get("last_plot.phylo",envir=.PlotPhyloEnv)$y.lim)
+par(cex=0.6)
+text(rep(0,length(obj$tree$tip.label)),1:Ntip(obj$tree),
+     gsub("_"," ",obj$tree$tip.label),font=3)
+plot(obj_vis,lwd=6,outline=TRUE,
+     direction="leftwards",ftype="off",fsize=c(0,1.2))
+
+fit_parallel<-rateshift(match.phylo.data(subtree,whatyouwant)$phy, whatyouwant, nrates=4, parallel = T)
+plot(fit_parallel,ftype="off")
+#### PGLS DV ####
+
+df_cap = data.frame(rownames(DV_visible),DV_visible$DV_vis,DV_grayscale$DV_grayscale)
+colnames(df_cap) <- c("Species","DV_visible","DV_grayscale")
+
+# df_cap <- df_cap %>%
+#   mutate_at(c("DV_visible","DV_grayscale"), ~(scale(.,center=T,scale=T) %>% as.vector)) #,"distphylosquared"
+
+
+#Régression phylogénétique
+library(caper)
+comp.data<-comparative.data(subtree, df_cap, names.col="Species", vcv.dim=2, warn.dropped=TRUE)
+modelo4<-pgls(DV_grayscale~DV_visible, data=comp.data, lambda="ML")
+summary(modelo4)
+
+
+ggplot(df_cap, aes(x=DV_visible,y=DV_grayscale))+
+  geom_point()+
+  geom_abline(aes(intercept = coef(modelo4)[1], slope = coef(modelo4)[2]), linetype="dashed")+
+  theme_classic()
+
+ggplot(df_cap, aes(x=log(DV_grayscale),y=log(DV_visible)))+
+  geom_point()+
+  theme_classic()
+
+lm.lk<-pgls.profile(modelo4, which="lambda")
+plot(lm.lk)
+
