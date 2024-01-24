@@ -11,7 +11,7 @@ library(RColorBrewer)
 source("./code/basis_functions/match_tree.R")
 source("./code/basis_functions/get_phenotype.R")
 
-#------------------ Get the specimens data -------------------------------------
+#------------------ Get the specimens data (UV) -------------------------------------
 
 pc = "./data/pca_embeddings_UV.csv"
 lvl = "sp"
@@ -22,8 +22,7 @@ if (lvl == "form"){
 }
 
 
-
-list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_FD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -34,7 +33,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_po
 subtree <- list_match[[1]]
 meanphen_FD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_FV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -44,7 +43,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_po
 subtree <- list_match[[1]]
 meanphen_FV <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_MD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -55,7 +54,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_po
 subtree <- list_match[[1]]
 meanphen_MD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_MV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -67,6 +66,12 @@ meanphen_MV <- list_match[[2]]
 
 meanphen_grayscale = rbind(meanphen_FD,meanphen_FV,meanphen_MD,meanphen_MV)
 data_grayscale = rbind(data_FD,data_FV,data_MD,data_MV)
+
+
+meanphen_FD_grayscale = meanphen_FD
+meanphen_FV_grayscale = meanphen_FV
+meanphen_MD_grayscale = meanphen_MD
+meanphen_MV_grayscale = meanphen_MV
 
 
 
@@ -106,8 +111,13 @@ names(x1) <- data_grayscale[data_grayscale$view=="D" & data_grayscale$sex=="M",,
 x2= data_grayscale[data_grayscale$view=="V" & data_grayscale$sex=="M",,drop=F]$meanb
 names(x2) <- data_grayscale[data_grayscale$view=="V" & data_grayscale$sex=="M",,drop=F]$tipsgenre
 
-phyl.pairedttest(subtree, x1,x2)
-pval = phyl.pairedttest(subtree, x1,x2)$P.dbar*4
+matching = match.phylo.data(subtree,x1)
+subtree_analysis = matching$phy
+x1 = matching$data
+x2 = x2[names(x1)]
+
+phyl.pairedttest(subtree_analysis, x1,x2)
+pval = phyl.pairedttest(subtree_analysis, x1,x2)$P.dbar*4
 
 d <- data.frame(tipsgenre = c(names(x1),names(x2)), meanb = c(x1,x2), view = c(rep("x1",length(x1)),rep("x2",length(x2))))
 
@@ -129,9 +139,13 @@ names(x1) <- data_grayscale[data_grayscale$view=="D" & data_grayscale$sex=="F",,
 x2= data_grayscale[data_grayscale$view=="V" & data_grayscale$sex=="F",,drop=F]$meanb
 names(x2) <- data_grayscale[data_grayscale$view=="V" & data_grayscale$sex=="F",,drop=F]$tipsgenre
 
-phyl.pairedttest(subtree, x1,x2)
+matching = match.phylo.data(subtree,x2)
+subtree_analysis = matching$phy
+x2 = matching$data
+x1 = x1[names(x2)]
 
-pval = phyl.pairedttest(subtree, x1,x2)$P.dbar*4
+phyl.pairedttest(subtree_analysis, x1,x2)
+pval = phyl.pairedttest(subtree_analysis, x1,x2)$P.dbar*4
 
 d <- data.frame(tipsgenre = c(names(x1),names(x2)), meanb = c(x1,x2), view = c(rep("x1",length(x1)),rep("x2",length(x2))))
 
@@ -152,9 +166,17 @@ names(x1) <- data_grayscale[data_grayscale$view=="D" & data_grayscale$sex=="F",,
 x2= data_grayscale[data_grayscale$view=="D" & data_grayscale$sex=="M",,drop=F]$meanb
 names(x2) <- data_grayscale[data_grayscale$view=="D" & data_grayscale$sex=="M",,drop=F]$tipsgenre
 
-phyl.pairedttest(subtree, x1,x2)
+matching = match.phylo.data(subtree,x2)
+subtree_analysis = matching$phy
+x2 = matching$data
+x1 = x1[names(x2)]
+x1=x1[!is.na(x1)]
+x2 = x2[names(x1)]
+matching = match.phylo.data(subtree,x2)
+subtree_analysis = matching$phy
 
-pval = phyl.pairedttest(subtree, x1,x2)$P.dbar*4
+phyl.pairedttest(subtree_analysis, x1,x2)
+pval = phyl.pairedttest(subtree_analysis, x1,x2)$P.dbar*4
 
 d <- data.frame(tipsgenre = c(names(x1),names(x2)), meanb = c(x1,x2), view = c(rep("x1",length(x1)),rep("x2",length(x2))))
 
@@ -175,9 +197,17 @@ names(x1) <- data_grayscale[data_grayscale$view=="V" & data_grayscale$sex=="F",,
 x2= data_grayscale[data_grayscale$view=="V" & data_grayscale$sex=="M",,drop=F]$meanb
 names(x2) <- data_grayscale[data_grayscale$view=="V" & data_grayscale$sex=="M",,drop=F]$tipsgenre
 
-phyl.pairedttest(subtree, x1,x2)
+matching = match.phylo.data(subtree,x2)
+subtree_analysis = matching$phy
+x2 = matching$data
+x1 = x1[names(x2)]
+x1=x1[!is.na(x1)]
+x2 = x2[names(x1)]
+matching = match.phylo.data(subtree,x2)
+subtree_analysis = matching$phy
 
-pval = phyl.pairedttest(subtree, x1,x2)$P.dbar*4
+phyl.pairedttest(subtree_analysis, x1,x2)
+pval = phyl.pairedttest(subtree_analysis, x1,x2)$P.dbar*4
 
 d <- data.frame(tipsgenre = c(names(x1),names(x2)), meanb = c(x1,x2), view = c(rep("x1",length(x1)),rep("x2",length(x2))))
 

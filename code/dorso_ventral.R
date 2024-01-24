@@ -24,8 +24,7 @@ if (lvl == "form"){
 }
 
 
-
-list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=F)
 meanphen <- list_get_phenotype[[1]]
 data_FD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -36,7 +35,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_po
 subtree <- list_match[[1]]
 meanphen_FD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=F)
 meanphen <- list_get_phenotype[[1]]
 data_FV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -46,7 +45,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_po
 subtree <- list_match[[1]]
 meanphen_FV <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=F)
 meanphen <- list_get_phenotype[[1]]
 data_MD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -57,7 +56,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_po
 subtree <- list_match[[1]]
 meanphen_MD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=F)
 meanphen <- list_get_phenotype[[1]]
 data_MV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -79,12 +78,11 @@ meanphen_MV_grayscale = meanphen_MV
 subtree_analysis = subtree #Save the tree to use in comparisons
 
 
-pc="./data/pca_embeddings_match.csv"
 #------------------ Get the specimens data (visible) -------------------------------------
 
 pc="./data/pca_embeddings_visible.csv"
 
-list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_visible.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_visible.csv",path_coords = pc, reduce_dataset=F)
 meanphen <- list_get_phenotype[[1]]
 data_FD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -95,7 +93,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_po
 subtree <- list_match[[1]]
 meanphen_FD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_visible.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_visible.csv",path_coords = pc, reduce_dataset=F)
 meanphen <- list_get_phenotype[[1]]
 data_FV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -105,7 +103,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_po
 subtree <- list_match[[1]]
 meanphen_FV <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_visible.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_visible.csv",path_coords = pc, reduce_dataset=F)
 meanphen <- list_get_phenotype[[1]]
 data_MD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -116,7 +114,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_po
 subtree <- list_match[[1]]
 meanphen_MD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_visible.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_visible.csv",path_coords = pc, reduce_dataset=F)
 meanphen <- list_get_phenotype[[1]]
 data_MV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -136,7 +134,7 @@ meanphen_MV = meanphen_MV[rownames(meanphen_MV_grayscale),]
 
 
 #------------------ Compare rates of evolution ---------------------------------
-sex="F" #Change this parameter to test for males or females
+sex="M" #Change this parameter to test for males or females
 
 if (sex=="M"){
   meanphen_D_vis = meanphen_MD
@@ -147,22 +145,38 @@ if (sex=="M"){
   meanphen_V_grayscale = meanphen_V_grayscale[rownames(meanphen_D_grayscale),,drop=F]
   meanphen_D_grayscale = meanphen_D_grayscale[complete.cases(meanphen_D_grayscale),,drop=F]
   meanphen_V_grayscale = meanphen_V_grayscale[complete.cases(meanphen_V_grayscale),,drop=F]
-}else
+  meanphen_D_vis = meanphen_D_vis[rownames(meanphen_V_vis),,drop=F]
+  meanphen_V_vis = meanphen_V_vis[rownames(meanphen_D_vis),,drop=F]
+  meanphen_D_vis = meanphen_D_vis[complete.cases(meanphen_D_vis),,drop=F]
+  meanphen_V_vis = meanphen_V_vis[complete.cases(meanphen_V_vis),,drop=F]
+  
+  }else
 {
   meanphen_D_vis = meanphen_FD
   meanphen_V_vis = meanphen_FV
   meanphen_D_grayscale = meanphen_FD_grayscale
   meanphen_V_grayscale = meanphen_FV_grayscale
+  meanphen_D_grayscale = meanphen_D_grayscale[rownames(meanphen_V_grayscale),,drop=F]
+  meanphen_V_grayscale = meanphen_V_grayscale[rownames(meanphen_D_grayscale),,drop=F]
+  meanphen_D_grayscale = meanphen_D_grayscale[complete.cases(meanphen_D_grayscale),,drop=F]
+  meanphen_V_grayscale = meanphen_V_grayscale[complete.cases(meanphen_V_grayscale),,drop=F]
+  meanphen_D_vis = meanphen_D_vis[rownames(meanphen_V_vis),,drop=F]
+  meanphen_V_vis = meanphen_V_vis[rownames(meanphen_D_vis),,drop=F]
+  meanphen_D_vis = meanphen_D_vis[complete.cases(meanphen_D_vis),,drop=F]
+  meanphen_V_vis = meanphen_V_vis[complete.cases(meanphen_V_vis),,drop=F]
 }
 
-
+subtree_analysis_1 = match.phylo.data(subtree,meanphen_D_grayscale)$phy
 #Rate ratio UV
-res.comp_grayscale = compare.multi.evol.rates(as.matrix(cbind(meanphen_D_grayscale,meanphen_V_grayscale)),subtree_analysis,gp=c(rep("D",length(meanphen_D_grayscale)),rep("V",length(meanphen_V_grayscale))))
+res.comp_grayscale = compare.multi.evol.rates(as.matrix(cbind(meanphen_D_grayscale,meanphen_V_grayscale)),subtree_analysis_1,gp=c(rep("D",length(meanphen_D_grayscale)),rep("V",length(meanphen_V_grayscale))))
 res.comp_grayscale
 
+subtree_analysis_2 = match.phylo.data(subtree,meanphen_D_vis)$phy
 #Rate ratio visible
-res.comp_vis = compare.multi.evol.rates(as.matrix(cbind(meanphen_D_vis,meanphen_V_vis)),subtree_analysis,gp=c(rep("D",length(meanphen_D_vis)),rep("V",length(meanphen_V_vis))))
+res.comp_vis = compare.multi.evol.rates(as.matrix(cbind(meanphen_D_vis,meanphen_V_vis)),subtree_analysis_2,gp=c(rep("D",length(meanphen_D_vis)),rep("V",length(meanphen_V_vis))))
 res.comp_vis
+
+
 
 #------------------ PGLS dorso-ventral -----------------------------------------
 

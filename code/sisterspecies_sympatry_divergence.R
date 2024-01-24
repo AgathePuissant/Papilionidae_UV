@@ -25,46 +25,45 @@ if (lvl == "form"){
 }
 
 
-
-list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_FD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
 rm(list=c("list_get_phenotype"))
 
 
-list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
 subtree <- list_match[[1]]
 meanphen_FD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_FV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
 rm(list=c("list_get_phenotype"))
 
-list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
 subtree <- list_match[[1]]
 meanphen_FV <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_MD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
 rm(list=c("list_get_phenotype"))
 
 
-list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
 subtree <- list_match[[1]]
 meanphen_MD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc)
+list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_MV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
 rm(list=c("list_get_phenotype"))
 
-list_match <- match_tree(meanphen_match = meanphen, data_match = data_MV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_MV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
 subtree <- list_match[[1]]
 meanphen_MV <- list_match[[2]]
 
@@ -72,8 +71,13 @@ meanphen_grayscale = rbind(meanphen_FD,meanphen_FV,meanphen_MD,meanphen_MV)
 data_grayscale = rbind(data_FD,data_FV,data_MD,data_MV)
 
 
+meanphen_FD_grayscale = meanphen_FD
+meanphen_FV_grayscale = meanphen_FV
+meanphen_MD_grayscale = meanphen_MD
+meanphen_MV_grayscale = meanphen_MV
 
-pc="./data/pca_embeddings_match.csv"
+
+
 #------------------ Compute pairwise distance in UV ----------------------------
 oritree = read.tree("./data/Papilionidae_MCC_clean.tre")
 sis=extract_sisters(subtree)
@@ -108,7 +112,7 @@ sp_data <- list_get_phenotype[[4]]
 rm(list=c("list_get_phenotype"))
 
 
-list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
 subtree <- list_match[[1]]
 meanphen_FD <- list_match[[2]]
 
@@ -118,7 +122,7 @@ data_FV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
 rm(list=c("list_get_phenotype"))
 
-list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
 subtree <- list_match[[1]]
 meanphen_FV <- list_match[[2]]
 
@@ -129,7 +133,7 @@ sp_data <- list_get_phenotype[[4]]
 rm(list=c("list_get_phenotype"))
 
 
-list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
 subtree <- list_match[[1]]
 meanphen_MD <- list_match[[2]]
 
@@ -139,12 +143,18 @@ data_MV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
 rm(list=c("list_get_phenotype"))
 
-list_match <- match_tree(meanphen_match = meanphen, data_match = data_MV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")#, genre=as.character(levels(data$Genre)[-c(21,10,24,23)]))
+list_match <- match_tree(meanphen_match = meanphen, data_match = data_MV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
 subtree <- list_match[[1]]
 meanphen_MV <- list_match[[2]]
 
 meanphen = rbind(meanphen_FD,meanphen_FV,meanphen_MD,meanphen_MV)
 data = rbind(data_FD,data_FV,data_MD,data_MV)
+
+meanphen_FD = meanphen_FD[rownames(meanphen_FD_grayscale),]
+meanphen_FV = meanphen_FV[rownames(meanphen_FV_grayscale),]
+meanphen_MD = meanphen_MD[rownames(meanphen_MD_grayscale),]
+meanphen_MV = meanphen_MV[rownames(meanphen_MV_grayscale),]
+
 
 #------------------ Compute pairwise distance in visible -----------------------
 
@@ -181,3 +191,4 @@ model<-glm(value~(visdist+overlap+distphylo):sex:view, data=MF_grayscale)
 summary(model)
 
 #-------------------------------------------------------------------------------
+
