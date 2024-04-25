@@ -1,0 +1,34 @@
+Battus_belus	Battus_crassus	black, red, antiquewhite, blue
+Byasa_plutonius	Byasa_mencius	black, red, antiquewhite, grey
+Euryades_corethrus	Euryades_duponchelii	black, red, yellow
+Graphium_agamemnon	Graphium_macfarlanei	black, antiquewhite
+Graphium_angolanus	Graphium_ridleyanus	black, antiquewhite, orange
+Graphium_antiphates	Graphium_agetes	black, antiquewhite, red
+Graphium_arycles	Graphium_evemon	black, antiquewhite, red
+Graphium_latreillianus	Graphium_leonidas	black, antiquewhite
+Graphium_milon	Graphium_sarpedon	black, blue
+Ornithoptera_aesacus	Ornithoptera_euphorion	green, black, antiquewhite, yellow
+Pachliopta_liris	Pachliopta_polydorus	black, antiquewhite, red
+Papilio_aegeus	Papilio_gambrisius	black, antiquewhite, blue, red
+Papilio_ambrax	Papilio_polytes	black, antiquewhite, red
+Papilio_buddha	Papilio_neumoegeni	black, blue, green, brown, lightbrown
+Papilio_demetrius	Papilio_protenor	black, antiquewhite, red
+Papilio_demoleus	Papilio_demodocus	brown, red, antiquewhite
+Papilio_erostratus	Papilio_pharnaces	black, red, antiquewhite
+Papilio_eurymedon	Papilio_rutulus	black, yellow, red, blue
+Papilio_homothoas	Papilio_cresphontes	yellow, black, red, blue
+Papilio_montrouzieri	Papilio_ulysses	black, blue, brown, lightbrown
+Parides_aeneas	Parides_tros	black, red, antiquewhite
+Parides_ascanius	Parides_bunichus	black, antiquewhite, red
+Parides_erithalion	Parides_vertumnus	black, red, antiquewhite
+Parides_eurimedes	Parides_zacynthus	black, red, antiquewhite
+Parnassius_actius	Parnassius_jacquemontii	antiquewhite, black, red
+Parnassius_apollonius	Parnassius_honrathi	antiquewhite, black, red
+Parnassius_nomion	Parnassius_epaphus	antiquewhite, black, red
+Protesilaus_molops	Protesilaus_protesilaus	antiquewhite, red, black
+Trogonoptera_brookiana	Trogonoptera_trojana	black, green, antiquewhite
+Troides_aeacus	Troides_minos	black, yellow, antiquewhite
+Troides_amphrysus	Troides_miranda	black, yellow, antiquewhite
+Troides_criton	Troides_rhadamantus	black, yellow, antiquewhite
+Troides_prattorum	Troides_vandepolli	black, yellow, antiquewhite
+Zerynthia_polyxena	Zerynthia_rumina	black, yellow, red

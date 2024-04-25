@@ -79,7 +79,7 @@ meanphen_MV_grayscale = meanphen_MV
 
 
 #------------------ Compute pairwise distance in UV ----------------------------
-oritree = read.tree("./data/Papilionidae_MCC_clean.tre")
+
 sis=extract_sisters(subtree)
 
 MD = create_distpheno(meanphen_MD,"M","D", level=lvl)
@@ -191,4 +191,3 @@ model<-glm(value~(visdist+overlap+distphylo):sex:view, data=MF_grayscale)
 summary(model)
 
 #-------------------------------------------------------------------------------
-

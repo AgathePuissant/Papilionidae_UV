@@ -167,6 +167,8 @@ if (sex=="M"){
 }
 
 subtree_analysis_1 = match.phylo.data(subtree,meanphen_D_grayscale)$phy
+meanphen_D_grayscale = match.phylo.data(subtree,meanphen_D_grayscale)$data
+meanphen_V_grayscale = match.phylo.data(subtree,meanphen_V_grayscale)$data
 #Rate ratio UV
 res.comp_grayscale = compare.multi.evol.rates(as.matrix(cbind(meanphen_D_grayscale,meanphen_V_grayscale)),subtree_analysis_1,gp=c(rep("D",length(meanphen_D_grayscale)),rep("V",length(meanphen_V_grayscale))))
 res.comp_grayscale
@@ -202,3 +204,5 @@ ggplot(df_cap, aes(x=DV_visible,y=DV_grayscale))+
   geom_point()+
   geom_abline(aes(intercept = coef(model)[1], slope = coef(model)[2]), linetype="dashed")+
   theme_classic()
+
+

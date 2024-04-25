@@ -222,21 +222,14 @@ stat.test[(stat.test$group1=="FV" & stat.test$group2=="MV") | (stat.test$group1=
 
 #------------- Create summary plot of all comparisons  -------------------------
 
-stat.test <- stat.test %>%
-  mutate(y.position = c(0.6,0.5,0.5,0.7))
-stat.test$p.signif <- apply(stat.test,1,function(x){
-  if (x[5] < 0.001){
-    return("***")
-  }else if (x[5] < 0.01){
-    return("**")
-  }else if (x[5] < 0.05){
-    return("*")
-  }else if (x[5] < 0.1){
-    return(".")
-  }else{
-    return("n.s.")
-  }
-})
+stat.test$y.position = c(170/255,150/255,150/255,190/255)
+
+stat.test$p.signif <- "n.s."
+stat.test$p.signif[stat.test[,5]<0.1] <- "."
+stat.test$p.signif[stat.test[,5]<0.05] <- "*"
+stat.test$p.signif[stat.test[,5]<0.01] <- "**"
+stat.test$p.signif[stat.test[,5]<0.001] <- "***"
+
 
 data_grayscale$group <- factor(data_grayscale$group, levels = c("FD", "MD", "FV","MV"))
 library(RColorBrewer)
@@ -247,7 +240,7 @@ ggplot(data=data_grayscale, aes(x=group,y=meanb))+
   geom_violin(aes(fill = group))+
   # geom_line(aes(group = tipsgenre)) +
   stat_summary(fun.data=mean_sdl, geom="pointrange", alpha =0.3)+
-  stat_pvalue_manual(stat.test, label="p.signif")+
+  stat_pvalue_manual(stat.test, label="p.signif",y.position = "y.position")+
   theme_classic()+
   xlab("Sex and wing side")+
   ylab("Mean UV brightness of wings")+
@@ -255,3 +248,7 @@ ggplot(data=data_grayscale, aes(x=group,y=meanb))+
   theme(legend.position = "none")
 
 #-------------------------------------------------------------------------------
+
+
+
+
