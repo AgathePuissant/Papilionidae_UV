@@ -9,7 +9,7 @@ harmonize <- function(path_data_photos= "data_photos.csv", path_coords = "pca_em
   data<-read.csv(file=path_coords, sep =';', header = T)
   data_loc<-read.csv(file=path_data_photos, sep =';', header = T, row.names = 1, fileEncoding="latin1")
   
-  data<-merge(x = data, y = data_loc[,c("id","genus","sex","sp","ssp","form", "collection_date")], by = "id")
+  data<-merge(x = data, y = data_loc[,c("id","genus","sex","sp","ssp","form")], by = "id") #, "collection_date"
   
   data$ssp[data$ssp=='-'] <- data$sp[data$ssp=='-']
   data$ssp[data$ssp==''] <- data$sp[data$ssp=='']

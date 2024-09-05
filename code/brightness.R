@@ -13,7 +13,7 @@ source("./code/basis_functions/get_phenotype.R")
 
 #------------------ Get the specimens data (UV) -------------------------------------
 
-pc = "./data/pca_embeddings_UV.csv"
+pc = "./data/pca_embeddings_UV_match_all.csv"
 lvl = "sp"
 if (lvl == "form"){
   adp=T
@@ -22,7 +22,7 @@ if (lvl == "form"){
 }
 
 
-list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_FD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -33,7 +33,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_po
 subtree <- list_match[[1]]
 meanphen_FD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_FV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -43,7 +43,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_po
 subtree <- list_match[[1]]
 meanphen_FV <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_MD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -54,7 +54,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_po
 subtree <- list_match[[1]]
 meanphen_MD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_MV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -77,7 +77,11 @@ meanphen_MV_grayscale = meanphen_MV
 
 #------------- Merge the data with mean brightness info ------------------------
 
-meanb <- read.csv("./data/meanb.csv", sep=";")
+# list_sp <- read.csv("C:/Users/Agathe/Mon Drive/Codes/data_analysis/UV/data/list_sp.csv", row.names=1, sep=";")
+# data_grayscale = data_grayscale[data_grayscale$genresp %in% list_sp$x,,F]
+
+meanb <- read.csv("./data/mean_brightness.csv", sep=";")
+meanb$meanb=meanb$meanb/255
 
 
 data_grayscale <- merge(data_grayscale,meanb, by = c("id","view"))
@@ -222,7 +226,8 @@ stat.test[(stat.test$group1=="FV" & stat.test$group2=="MV") | (stat.test$group1=
 
 #------------- Create summary plot of all comparisons  -------------------------
 
-stat.test$y.position = c(170/255,150/255,150/255,190/255)
+# stat.test$y.position = c(80/255,60/255,60/255,100/255)
+stat.test$y.position = c(80/255,70/255,70/255,90/255)
 
 stat.test$p.signif <- "n.s."
 stat.test$p.signif[stat.test[,5]<0.1] <- "."
@@ -232,9 +237,14 @@ stat.test$p.signif[stat.test[,5]<0.001] <- "***"
 
 
 data_grayscale$group <- factor(data_grayscale$group, levels = c("FD", "MD", "FV","MV"))
+# data_grayscale$group <- factor(data_grayscale$group, levels = c("MD", "MV", "FD","FV"))
+
+# stat.test = stat.test[c(1,4),]
+
 library(RColorBrewer)
 color_paired = brewer.pal(n=4,"Paired")
 color_paired=color_paired[c(1,3,2,4)]
+# color_paired=color_paired[c(3,4,1,2)]
 
 ggplot(data=data_grayscale, aes(x=group,y=meanb))+
   geom_violin(aes(fill = group))+
@@ -245,7 +255,8 @@ ggplot(data=data_grayscale, aes(x=group,y=meanb))+
   xlab("Sex and wing side")+
   ylab("Mean UV brightness of wings")+
   scale_fill_manual(values=color_paired)+ 
-  theme(legend.position = "none")
+  theme(legend.position = "none",
+        text = element_text(size = 15))
 
 #-------------------------------------------------------------------------------
 

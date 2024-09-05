@@ -51,7 +51,7 @@ for img in tqdm.tqdm(images):
 for i in tqdm.tqdm(range(len(padded_images))) :
     im= padded_images[i]
     
-    im=cv2.resize(im, (im.shape[1]//2,im.shape[0]//2)) #Here you can resize the image for shorter computation time for the patternize code
+    im=cv2.resize(im, (im.shape[1],im.shape[0])) #Here you can resize the image for shorter computation time for the patternize code
     
     gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     
