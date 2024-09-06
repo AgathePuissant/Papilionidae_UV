@@ -15,7 +15,7 @@ source("./code/basis_functions/get_phenotype.R")
 
 #------------------ Get the specimens data (UV) -------------------------------------
 
-pc = "./data/pca_embeddings_UV.csv"
+pc = "./data/pca_embeddings_UV_match_all.csv"
 lvl = "sp"
 if (lvl == "form"){
   adp=T
@@ -24,7 +24,7 @@ if (lvl == "form"){
 }
 
 
-list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_FD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -35,7 +35,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_po
 subtree <- list_match[[1]]
 meanphen_FD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_FV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -45,7 +45,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_po
 subtree <- list_match[[1]]
 meanphen_FV <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_MD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -56,7 +56,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_po
 subtree <- list_match[[1]]
 meanphen_MD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_MV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -79,11 +79,13 @@ meanphen_MV_grayscale = meanphen_MV
 
 #------------- Merge the data with mean brightness info ------------------------
 
-meanb <- read.csv("./data/meanb.csv", sep=";")
+meanb <- read.csv("./data/mean_brightness.csv", sep=";")
+
+ages = read.csv("./data/data_photos_UV.csv",sep=";")
 
 
 data_grayscale <- merge(data_grayscale,meanb, by = c("id","view"))
-
+data_grayscale$collection_date = ages[match(data_grayscale$id,ages$id),]$collection_date
 
 #------------------ Effect of specimen age --------------------------------
 
@@ -103,7 +105,6 @@ null_model = lmer(meanb~1+(1|tipsgenre),
                   data=data_lme,
                   REML= F)
 
-AICcmodavg::AICc(null_model, return.K = F, second.ord=F)
-AICcmodavg::AICc(model_mixed, return.K = F, second.ord=F)
+AICcmodavg::AICc(null_model, return.K = F, second.ord=F) - AICcmodavg::AICc(model_mixed, return.K = F, second.ord=F)
 
 confint(model_mixed)

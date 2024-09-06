@@ -23,9 +23,9 @@ def pad_image(img, target_size):
     return padded_img
 
 
-path_im=r"C:\Users\Agathe\Documents\GitHub\Papilionidae_UV\UV_pictures"
-path_im_save=r"C:\Users\Agathe\Documents\GitHub\Papilionidae_UV\UV_pictures\UV_pictures_resized"
-path_outlines = r"C:\Users\Agathe\Documents\GitHub\Papilionidae_UV\UV_pictures\outlines_UV"
+path_im=r"C:\Users\Agathe\Desktop\visible_pictures"
+path_im_save=r"C:\Users\Agathe\Desktop\visible_pictures\visible_pictures_resized"
+path_outlines = r"C:\Users\Agathe\Desktop\visible_pictures\outlines_visible"
 listim = os.listdir(path_im)
 listim = [x for x in listim if x[-4:]==".jpg"]
 
@@ -51,7 +51,7 @@ for img in tqdm.tqdm(images):
 for i in tqdm.tqdm(range(len(padded_images))) :
     im= padded_images[i]
     
-    im=cv2.resize(im, (im.shape[1],im.shape[0])) #Here you can resize the image for shorter computation time for the patternize code
+    im=cv2.resize(im, (im.shape[1]//4,im.shape[0]//4)) #Here you can resize the image for shorter computation time for the patternize code
     
     gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     

@@ -26,14 +26,14 @@ if (mode=="UV"){
   list_mask = list.files(path = './UV_pictures/outlines_UV')
   
   IDlist <- list.files("./UV_pictures/UV_pictures_resized")
-  IDlist <- gsub(".jpg","",IDlist)
+  IDlist <- gsub(".png","",IDlist)
   
   prepath <- './UV_pictures/UV_pictures_resized'
-  extension <- '.jpg'
+  extension <- '.png'
   
   imageList <- makeList(IDlist, 'image', prepath, extension)
   
-  pc = "./data/pca_embeddings_UV.csv"
+  pc = "./data/pca_embeddings_UV_match_all.csv"
   lvl = "sp"
   if (lvl == "form"){
     adp=T
@@ -42,7 +42,7 @@ if (mode=="UV"){
   }
   
   
-  list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+  list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
   meanphen <- list_get_phenotype[[1]]
   data_FD <- list_get_phenotype[[2]]
   sp_data <- list_get_phenotype[[4]]
@@ -52,7 +52,7 @@ if (mode=="UV"){
   list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
   subtree <- list_match[[1]]
   
-  list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+  list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
   meanphen <- list_get_phenotype[[1]]
   data_FV <- list_get_phenotype[[2]]
   sp_data <- list_get_phenotype[[4]]
@@ -61,7 +61,7 @@ if (mode=="UV"){
   list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
   subtree <- list_match[[1]]
   
-  list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+  list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
   meanphen <- list_get_phenotype[[1]]
   data_MD <- list_get_phenotype[[2]]
   sp_data <- list_get_phenotype[[4]]
@@ -71,7 +71,7 @@ if (mode=="UV"){
   list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
   subtree <- list_match[[1]]
   
-  list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
+  list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
   meanphen <- list_get_phenotype[[1]]
   data_MV <- list_get_phenotype[[2]]
   sp_data <- list_get_phenotype[[4]]
@@ -97,7 +97,7 @@ if (mode=="UV"){
   
   imageList <- makeList(IDlist, 'image', prepath, extension)
   
-  pc="./data/pca_embeddings_visible.csv"
+  pc="./data/pca_embeddings_match_all.csv"
   lvl = "sp"
   if (lvl == "form"){
     adp=T
@@ -149,12 +149,15 @@ if (mode=="UV"){
 }
 
 #Set patternize parameters
-RGB=rep(180,3) #RGB cutoff 
+RGB=rep(220,3) #RGB cutoff 
 vec_nk = c() #To store number of color for segmentation of visible light images
 
 
 #Prepare the dataframe to receive the results
-sis=extract_sisters(subtree)
+# sis=extract_sisters(subtree)
+sis=read.table("./data/sis_list.csv", head=T,sep=";",row.names = 1)
+colnames(sis) <- c("sp1","sp2")
+
 listpatternize =list()
 sis$ratioM = NA
 sis$ratioF = NA
@@ -393,7 +396,7 @@ cl <- makeCluster(cores)
 registerDoParallel(cl)
 
 # Permutations
-nsim <- 10000 #Set the numbers of permutations
+nsim <- 1000 #Set the numbers of permutations
 
 #Prepare the dataframe for the output of each permutation
 perm_df <- matrix(nrow = nsim, ncol = length(coordpca_list))
@@ -446,8 +449,8 @@ perm_df <- foreach(permutation = 1:nsim, .combine = "rbind") %dopar% {
     ratioF_perm <- dist_coord_pca_perm["2VF", "1VF"] / dist_coord_pca_perm["2DF", "1DF"]
     
     #Uncomment the line for the sex for which you want to plot the permutation results
+    results[pca_n] <- ratioF_perm
     # results[pca_n] <- ratioF_perm
-    results[pca_n] <- ratioM_perm
   }
   results
 }
@@ -465,7 +468,7 @@ median_perm = perm_df %>%
 #-------------------- Plot permutations and compute p-values -------------------
 
 #Uncomment the line for the sex of which you want to plot the permutations results
-stattotest = median(sis$ratioM, na.rm=T)
+stattotest = median(sis$ratioF, na.rm=T)
 # stattotest = median(sis$ratioF, na.rm=T)
 
 
