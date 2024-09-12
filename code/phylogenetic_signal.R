@@ -1,14 +1,11 @@
+
 #------------------ Prepare libraries and functions ----------------------------
 
-library(diverge)
 library(reshape2)
-library(ggpubr)
 library(ape)
-library(ggpubr)
 library(phytools)
-library(RColorBrewer)
-library(lme4)
-library(AICcmodavg)
+library(caper)
+library(mvMORPH)
 
 source("./code/basis_functions/match_tree.R")
 source("./code/basis_functions/get_phenotype.R")
@@ -75,36 +72,60 @@ meanphen_FV_grayscale = meanphen_FV
 meanphen_MD_grayscale = meanphen_MD
 meanphen_MV_grayscale = meanphen_MV
 
+subtree_analysis = subtree #Save the tree to use in comparisons
+
+#-----------------------------------------------------------
+
+subtree = match.phylo.data(subtree, meanphen_MV_grayscale)$phy
+bm = mvgls(as.matrix(meanphen_MV_grayscale)~1, tree=subtree, model="BM")
+ou = mvgls(as.matrix(meanphen_MV_grayscale)~1, tree=subtree, model="OU")
+eb = mvgls(as.matrix(meanphen_MV_grayscale)~1, tree=subtree, model="EB")
+lam_MV = mvgls(as.matrix(meanphen_MV_grayscale)~1, tree=subtree, model="lambda")
 
 
-#------------- Merge the data with mean brightness info ------------------------
+GIC(bm) ; GIC(ou) ; GIC(eb) ; GIC(lam_MV)
 
-meanb <- read.csv("./data/mean_brightness.csv", sep=";")
-
-ages = read.csv("./data/collection_date.csv",sep=";")
+lam_MV
 
 
-data_grayscale <- merge(data_grayscale,meanb, by = c("id","view"))
-data_grayscale$collection_date = ages[match(data_grayscale$id,ages$id),]$collection_date
+bm = mvgls(as.matrix(meanphen_MD_grayscale)~1, tree=subtree, model="BM")
+ou = mvgls(as.matrix(meanphen_MD_grayscale)~1, tree=subtree, model="OU")
+eb = mvgls(as.matrix(meanphen_MD_grayscale)~1, tree=subtree, model="EB")
+lam_MD = mvgls(as.matrix(meanphen_MD_grayscale)~1, tree=subtree, model="lambda")
 
-#------------------ Effect of specimen age --------------------------------
+
+GIC(bm) ; GIC(ou) ; GIC(eb) ; GIC(lam_MD)
+
+lam_MD
 
 
-data_lme = data_grayscale
+#-----------------------------------
 
-data_lme$specimen_age = 2024 - data_lme$collection_date
 
-data_lme = data_lme[!is.na(data_lme$collection_date),,drop=F]
+subtree = match.phylo.data(subtree, meanphen_FV_grayscale)$phy
+bm = mvgls(as.matrix(meanphen_FV_grayscale)~1, tree=subtree, model="BM")
+ou = mvgls(as.matrix(meanphen_FV_grayscale)~1, tree=subtree, model="OU")
+eb = mvgls(as.matrix(meanphen_FV_grayscale)~1, tree=subtree, model="EB")
+lam_FV = mvgls(as.matrix(meanphen_FV_grayscale)~1, tree=subtree, model="lambda")
 
-model_mixed <- lmer(meanb~specimen_age+(1|tipsgenre),
-                    data=data_lme,
-                    REML = F)
-summary(model_mixed) 
 
-null_model = lmer(meanb~1+(1|tipsgenre),
-                  data=data_lme,
-                  REML= F)
+GIC(bm) ; GIC(ou) ; GIC(eb) ; GIC(lam_FV)
 
-AICcmodavg::AICc(null_model, return.K = F, second.ord=F) - AICcmodavg::AICc(model_mixed, return.K = F, second.ord=F)
+lam_FV
 
-confint(model_mixed)
+
+bm = mvgls(as.matrix(meanphen_FD_grayscale)~1, tree=subtree, model="BM")
+ou = mvgls(as.matrix(meanphen_FD_grayscale)~1, tree=subtree, model="OU")
+eb = mvgls(as.matrix(meanphen_FD_grayscale)~1, tree=subtree, model="EB")
+lam_FD = mvgls(as.matrix(meanphen_FD_grayscale)~1, tree=subtree, model="lambda")
+
+
+GIC(bm) ; GIC(ou) ; GIC(eb) ; GIC(lam_FD)
+
+lam_FD
+
+
+
+lam_MD$param ; lam_MV$param
+lam_FD$param ; lam_FV$param
+

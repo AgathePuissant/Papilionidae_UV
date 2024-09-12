@@ -15,7 +15,7 @@ source("./code/basis_functions/get_phenotype.R")
 
 #------------------ Get the specimens data (UV) -------------------------------------
 
-pc = "./data/pca_embeddings_UV_match_all.csv"
+pc = "./data/pca_embeddings_UV.csv"
 lvl = "sp"
 if (lvl == "form"){
   adp=T
@@ -24,7 +24,7 @@ if (lvl == "form"){
 }
 
 
-list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_FD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -35,7 +35,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_po
 subtree <- list_match[[1]]
 meanphen_FD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_FV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -45,7 +45,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_po
 subtree <- list_match[[1]]
 meanphen_FV <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_MD <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -56,7 +56,7 @@ list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_po
 subtree <- list_match[[1]]
 meanphen_MD <- list_match[[2]]
 
-list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
+list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
 data_MV <- list_get_phenotype[[2]]
 sp_data <- list_get_phenotype[[4]]
@@ -78,17 +78,9 @@ meanphen_MV_grayscale = meanphen_MV
 subtree_analysis = subtree #Save the tree to use in comparisons
 
 
-list_sp <- read.csv("~/GitHub/Papilionidae_UV/data/list_sp.csv", sep=";")
-# meanphen_MD_grayscale = meanphen_MD_grayscale[rownames(meanphen_MD_grayscale) %in% list_sp$x,,F]
-# meanphen_MV_grayscale = meanphen_MV_grayscale[rownames(meanphen_MV_grayscale) %in% list_sp$x,,F]
-# meanphen_FD_grayscale = meanphen_FD_grayscale[rownames(meanphen_FD_grayscale) %in% list_sp$x,,F]
-# meanphen_FV_grayscale = meanphen_FV_grayscale[rownames(meanphen_FV_grayscale) %in% list_sp$x,,F]
-
-
-
 #------------------ Get the specimens data (visible) -------------------------------------
 
-pc="./data/pca_embeddings_match_all.csv"
+pc="./data/pca_embeddings_visible.csv"
 
 list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_visible.csv",path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
@@ -134,11 +126,6 @@ meanphen_MV <- list_match[[2]]
 
 meanphen = rbind(meanphen_FD,meanphen_FV,meanphen_MD,meanphen_MV)
 data = rbind(data_FD,data_FV,data_MD,data_MV)
-# 
-# meanphen_FD = meanphen_FD[rownames(meanphen_FD_grayscale),]
-# meanphen_FV = meanphen_FV[rownames(meanphen_FV_grayscale),]
-# meanphen_MD = meanphen_MD[rownames(meanphen_MD_grayscale),]
-# meanphen_MV = meanphen_MV[rownames(meanphen_MV_grayscale),]
 
 
 #------------------ Compare rates of evolution ---------------------------------
@@ -189,122 +176,6 @@ res.comp_vis = compare.multi.evol.rates(as.matrix(cbind(meanphen_D_vis,meanphen_
 res.comp_vis
 
 
-#---------------Prepare-------------------
-
-meanphen_D_vis2 = meanphen_D_vis
-meanphen_D_vis2$spname = rownames(meanphen_D_vis2)
-meanphen_V_vis2 = meanphen_V_vis
-meanphen_V_vis2$spname = rownames(meanphen_V_vis2)
-
-meanphen_D_grayscale2 = meanphen_D_grayscale
-meanphen_D_grayscale2$spname = rownames(meanphen_D_grayscale2)
-meanphen_V_grayscale2 = meanphen_V_grayscale
-meanphen_V_grayscale2$spname = rownames(meanphen_V_grayscale2)
-
-
-MF_visible2 = MF_visible
-MF_visible2$spname=MF_visible2$Var1
-MF_visible2 = MF_visible2[,c(7,12)]
-MF_visible2 = MF_visible2[!duplicated(MF_visible2),]
-MF_visible3 = MF_visible
-MF_visible3$spname=MF_visible3$Var2
-MF_visible3 = MF_visible3[,c(7,12)]
-MF_visible3 = MF_visible3[!duplicated(MF_visible3),]
-
-meanphen_D_vis2$overlap = NA
-# First join with MF_visible2
-meanphen_D_vis2 <- meanphen_D_vis2 %>%
-  left_join(MF_visible2, by = "spname", suffix = c("", ".MF2")) %>%
-  mutate(overlap = coalesce(overlap, overlap.MF2)) 
-meanphen_D_vis2$overlap.MF2 = NULL
-# Second join with MF_visible3
-meanphen_D_vis2 <- meanphen_D_vis2 %>%
-  left_join(MF_visible3, by = "spname", suffix = c("", ".MF3")) %>%
-  mutate(overlap = coalesce(overlap, overlap.MF3))
-meanphen_D_vis2$overlap.MF3 = NULL
-
-
-meanphen_V_vis2$overlap = NA
-# First join with MF_visible2
-meanphen_V_vis2 <- meanphen_V_vis2 %>%
-  left_join(MF_visible2, by = "spname", suffix = c("", ".MF2")) %>%
-  mutate(overlap = coalesce(overlap, overlap.MF2)) 
-meanphen_V_vis2$overlap.MF2 = NULL
-# Second join with MF_visible3
-meanphen_V_vis2 <- meanphen_V_vis2 %>%
-  left_join(MF_visible3, by = "spname", suffix = c("", ".MF3")) %>%
-  mutate(overlap = coalesce(overlap, overlap.MF3))
-meanphen_V_vis2$overlap.MF3 = NULL
-
-
-meanphen_D_grayscale2$overlap = NA
-# First join with MF_visible2
-meanphen_D_grayscale2 <- meanphen_D_grayscale2 %>%
-  left_join(MF_visible2, by = "spname", suffix = c("", ".MF2")) %>%
-  mutate(overlap = coalesce(overlap, overlap.MF2)) 
-meanphen_D_grayscale2$overlap.MF2 = NULL
-# Second join with MF_visible3
-meanphen_D_grayscale2 <- meanphen_D_grayscale2 %>%
-  left_join(MF_visible3, by = "spname", suffix = c("", ".MF3")) %>%
-  mutate(overlap = coalesce(overlap, overlap.MF3))
-meanphen_D_grayscale2$overlap.MF3 = NULL
-
-
-meanphen_V_grayscale2$overlap = NA
-# First join with MF_visible2
-meanphen_V_grayscale2 <- meanphen_V_grayscale2 %>%
-  left_join(MF_visible2, by = "spname", suffix = c("", ".MF2")) %>%
-  mutate(overlap = coalesce(overlap, overlap.MF2)) 
-meanphen_V_grayscale2$overlap.MF2 = NULL
-# Second join with MF_visible3
-meanphen_V_grayscale2 <- meanphen_V_grayscale2 %>%
-  left_join(MF_visible3, by = "spname", suffix = c("", ".MF3")) %>%
-  mutate(overlap = coalesce(overlap, overlap.MF3))
-meanphen_V_grayscale2$overlap.MF3 = NULL
-
-#---------------Overlap select-------------------
-
-overlap_bin = meanphen_D_vis2[meanphen_D_vis2$overlap<=0,]$spname
-
-meanphen_D_vis2 = meanphen_D_vis2[meanphen_D_vis2$spname %in% overlap_bin,]
-rownames(meanphen_D_vis2)=meanphen_D_vis2$spname
-meanphen_D_vis2$spname=NULL
-meanphen_D_vis2$overlap=NULL
-
-
-meanphen_V_vis2 = meanphen_V_vis2[meanphen_V_vis2$spname %in% overlap_bin,]
-rownames(meanphen_V_vis2)=meanphen_V_vis2$spname
-meanphen_V_vis2$spname=NULL
-meanphen_V_vis2$overlap=NULL
-
-meanphen_D_grayscale2 = meanphen_D_grayscale2[meanphen_D_grayscale2$spname %in% overlap_bin,]
-rownames(meanphen_D_grayscale2)=meanphen_D_grayscale2$spname
-meanphen_D_grayscale2$spname=NULL
-meanphen_D_grayscale2$overlap=NULL
-
-meanphen_V_grayscale2 = meanphen_V_grayscale2[meanphen_V_grayscale2$spname %in% overlap_bin,]
-rownames(meanphen_V_grayscale2)=meanphen_V_grayscale2$spname
-meanphen_V_grayscale2$spname=NULL
-meanphen_V_grayscale2$overlap=NULL
-
-#---------------rate ratio symp-------------------
-
-subtree_analysis_1 = match.phylo.data(subtree,meanphen_D_grayscale2)$phy
-meanphen_D_grayscale2 = match.phylo.data(subtree,meanphen_D_grayscale2)$data
-meanphen_V_grayscale2 = match.phylo.data(subtree,meanphen_V_grayscale2)$data
-dim(meanphen_V_grayscale2)
-
-#Rate ratio UV
-res.comp_grayscale = compare.multi.evol.rates(as.matrix(cbind(meanphen_D_grayscale2,meanphen_V_grayscale2)),subtree_analysis_1,gp=c(rep("D",length(meanphen_D_grayscale2)),rep("V",length(meanphen_V_grayscale2))))
-res.comp_grayscale
-
-subtree_analysis_2 = match.phylo.data(subtree,meanphen_D_vis2)$phy
-#Rate ratio visible
-res.comp_vis = compare.multi.evol.rates(as.matrix(cbind(meanphen_D_vis2,meanphen_V_vis2)),subtree_analysis_2,gp=c(rep("D",length(meanphen_D_vis2)),rep("V",length(meanphen_V_vis2))))
-res.comp_vis
-
-
-# compare.multi.evol.rates(as.matrix(cbind(meanphen_V_vis,meanphen_V_grayscale)),subtree_analysis_2,gp=c(rep("V_vis",length(meanphen_V_vis)),rep("V_grayscale",length(meanphen_V_grayscale))),Subset=F)
 
 #------------------ PGLS dorso-ventral -----------------------------------------
 
@@ -315,6 +186,8 @@ colnames(DV_visible)<-"DV_vis"
 DV_grayscale = as.data.frame(diag(as.matrix(dist(meanphen_D_grayscale, meanphen_V_grayscale))))
 colnames(DV_grayscale)<-"DV_grayscale"
 rownames(DV_grayscale) <- rownames(meanphen_D_grayscale)
+
+DV_visible = DV_visible[rownames(DV_grayscale),,F]
 
 #Create dataframe for PGLS
 df_cap = data.frame(rownames(DV_visible),DV_visible$DV_vis,DV_grayscale$DV_grayscale)

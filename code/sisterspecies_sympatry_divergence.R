@@ -16,7 +16,7 @@ source("./code/basis_functions/get_phenotype.R")
 
 #------------------ Get the specimens data (UV) -------------------------------------
 
-pc = "./data/pca_embeddings_UV_match_all.csv"
+pc = "./data/pca_embeddings_UV.csv"
 lvl = "sp"
 if (lvl == "form"){
   adp=T
@@ -24,7 +24,7 @@ if (lvl == "form"){
   adp = F
 }
 
-path_data_UV = "./data/data_photos_UV_pythoncalib.csv"
+path_data_UV = "./data/data_photos_UV.csv"
 
 list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = path_data_UV,path_coords = pc, reduce_dataset=T)
 meanphen <- list_get_phenotype[[1]]
@@ -77,19 +77,11 @@ meanphen_FV_grayscale = meanphen_FV
 meanphen_MD_grayscale = meanphen_MD
 meanphen_MV_grayscale = meanphen_MV
 
-# list_sp <- read.csv("~/GitHub/Papilionidae_UV/data/list_sp.csv", sep=";")
-# meanphen_MD_grayscale = meanphen_MD_grayscale[rownames(meanphen_MD_grayscale) %in% list_sp$x,,F]
-# meanphen_MV_grayscale = meanphen_MV_grayscale[rownames(meanphen_MV_grayscale) %in% list_sp$x,,F]
-# meanphen_FD_grayscale = meanphen_FD_grayscale[rownames(meanphen_FD_grayscale) %in% list_sp$x,,F]
-# meanphen_FV_grayscale = meanphen_FV_grayscale[rownames(meanphen_FV_grayscale) %in% list_sp$x,,F]
-
 subtree = match.phylo.data(subtree,meanphen_MD_grayscale)$phy
 
 #------------------ Compute pairwise distance in UV ----------------------------
 
-# sis=extract_sisters(subtree)
-sis=read.table("./data/sis_list.csv", head=T,sep=";",row.names = 1)
-colnames(sis) <- c("sp1","sp2")
+sis=extract_sisters(subtree)
 
 MD = create_distpheno(meanphen_MD,"M","D", level=lvl)
 MD$sex="M"
@@ -112,7 +104,7 @@ MF_grayscale$type = "grayscale"
 
 #------------------ Get the specimens data (visible) -------------------------------------
 
-pc="./data/pca_embeddings_match_all.csv"
+pc="./data/pca_embeddings_visible.csv"
 
 path_data_visible = "./data/data_photos_visible.csv"
 
@@ -203,8 +195,6 @@ MF_visible = MF_visible[match(paste(MF_grayscale$Var1,MF_grayscale$Var2,MF_grays
 MF_grayscale$visdist = MF_visible[match(paste(MF_grayscale$Var1,MF_grayscale$Var2,MF_grayscale$sex,MF_grayscale$view),paste(MF_visible$Var1,MF_visible$Var2,MF_visible$sex,MF_visible$view)),]$value
 MF_grayscale = MF_grayscale[MF_grayscale$Var1!=MF_grayscale$Var2,]
 
-list_new=unique(paste0(MF_grayscale$Var1,"-",MF_grayscale$Var2))
-setdiff(rownames(sis),list_new)
 
 #GLM
 model<-glm(value~(visdist+overlap+distphylo):sex:view, data=MF_grayscale)
