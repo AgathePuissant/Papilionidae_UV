@@ -16,6 +16,3 @@ The file "patternize_sis_sp.R" runs the patternize analysis on the sister specie
 
 Within the data folder :
 The color_sis_sp.txt contains putative color categorization for the sister species that are used just to set the final number of colours retained for the automatic recolorize colour segmentation and patternize analysis.
-
-meanb_hidden files contain the mean UV brightness calculated on images with overlapped pixels removed for a 30° rotations of the forewings, and 20° for meanb_hidden20 and 40° for meanb_hidden40
-In the same wat, pca_mebeddings_hidden[20,40] contain the pca coordinates of those images in the UV morphospace.
