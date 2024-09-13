@@ -145,8 +145,7 @@ if (sex=="M"){
   meanphen_D_vis = meanphen_D_vis[complete.cases(meanphen_D_vis),,drop=F]
   meanphen_V_vis = meanphen_V_vis[complete.cases(meanphen_V_vis),,drop=F]
   
-  }else
-{
+  }else{
   meanphen_D_vis = meanphen_FD
   meanphen_V_vis = meanphen_FV
   meanphen_D_grayscale = meanphen_FD_grayscale
@@ -197,7 +196,6 @@ colnames(df_cap) <- c("Species","DV_visible","DV_grayscale")
 comp.data<-comparative.data(subtree_analysis, df_cap, names.col="Species", vcv.dim=2, warn.dropped=TRUE)
 model<-pgls(DV_grayscale~DV_visible, data=comp.data, lambda="ML")
 summary(model)
-
 
 ggplot(df_cap, aes(x=DV_visible,y=DV_grayscale))+
   geom_point()+

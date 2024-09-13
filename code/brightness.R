@@ -78,7 +78,6 @@ meanphen_MV_grayscale = meanphen_MV
 #------------- Merge the data with mean brightness info ------------------------
 
 meanb <- read.csv("./data/mean_brightness.csv", sep=";")
-meanb$meanb=meanb$meanb/255
 
 
 data_grayscale <- merge(data_grayscale,meanb, by = c("id","view"))

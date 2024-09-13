@@ -201,4 +201,5 @@ model<-glm(value~(visdist+overlap+distphylo):sex:view, data=MF_grayscale)
 
 summary(model)
 
+
 #-------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-embeddings_pythoncalib <- read.csv("data/embeddings_pythoncalib.csv",sep=";")
+embeddings_pythoncalib <- read.csv("data/embeddings_UV.csv",sep=";")
 
 rownames(embeddings_pythoncalib) = paste0(embeddings_pythoncalib$id,embeddings_pythoncalib$view)
 
@@ -11,7 +11,7 @@ distpheno = distpheno[as.numeric(distpheno$Var1)<as.numeric(distpheno$Var2),,F]
 distpheno = distpheno[distpheno$value>0,,F]
 
 
-data_photos = read.csv("./data/data_photos_UV_pythoncalib.csv",sep=";")
+data_photos = read.csv("./data/data_photos_UV.csv",sep=";")
 
 distpheno$sp1 = data_photos[match(gsub("D|V","",distpheno$Var1),data_photos$id),]$sp
 distpheno$sp2 = data_photos[match(gsub("D|V","",distpheno$Var2),data_photos$id),]$sp
