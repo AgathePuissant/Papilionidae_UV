@@ -1,4 +1,4 @@
-embeddings_pythoncalib <- read.csv("data/embeddings_UV.csv",sep=";")
+embeddings_pythoncalib <- read.csv("data/embeddings_UVretrained.csv",sep=";")
 
 rownames(embeddings_pythoncalib) = paste0(embeddings_pythoncalib$id,embeddings_pythoncalib$view)
 

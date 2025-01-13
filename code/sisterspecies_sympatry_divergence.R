@@ -16,7 +16,7 @@ source("./code/basis_functions/get_phenotype.R")
 
 #------------------ Get the specimens data (UV) -------------------------------------
 
-pc = "./data/pca_embeddings_UV.csv"
+pc = "./data/pca_embeddings_pythoncalib_retrained.csv"
 lvl = "sp"
 if (lvl == "form"){
   adp=T
@@ -195,6 +195,11 @@ MF_visible = MF_visible[match(paste(MF_grayscale$Var1,MF_grayscale$Var2,MF_grays
 MF_grayscale$visdist = MF_visible[match(paste(MF_grayscale$Var1,MF_grayscale$Var2,MF_grayscale$sex,MF_grayscale$view),paste(MF_visible$Var1,MF_visible$Var2,MF_visible$sex,MF_visible$view)),]$value
 MF_grayscale = MF_grayscale[MF_grayscale$Var1!=MF_grayscale$Var2,]
 
+MF_grayscale$value <- scale(MF_grayscale$value)
+MF_grayscale$visdist <- scale(MF_grayscale$visdist)
+
+
+# MF_grayscale = MF_grayscale[MF_grayscale$Var1!="Protesilaus_molops",,F]
 
 #GLM
 model<-glm(value~(visdist+overlap+distphylo):sex:view, data=MF_grayscale)
@@ -203,3 +208,10 @@ summary(model)
 
 
 #-------------------------------------------------------------------------------
+
+ggplot(MF_grayscale[(MF_grayscale$view=="V") & (MF_grayscale$sex=="M"),],aes(x=overlap, y=value, label=Var1))+
+  geom_point()+
+  geom_text(size=2)
+
+
+# id_toretain = paste0(data_UV[((data_UV$tipsgenre %in% sis$sp1) | (data_UV$tipsgenre %in% sis$sp2)) & (data_UV$sex == "M"),]$id, "V.jpg")

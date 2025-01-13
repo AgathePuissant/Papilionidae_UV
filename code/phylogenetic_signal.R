@@ -12,7 +12,7 @@ source("./code/basis_functions/get_phenotype.R")
 
 #------------------ Get the specimens data (UV) -------------------------------------
 
-pc = "./data/pca_embeddings_UV.csv"
+pc = "./data/pca_embeddings_pythoncalib_retrained.csv"
 lvl = "sp"
 if (lvl == "form"){
   adp=T

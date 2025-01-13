@@ -15,7 +15,7 @@ source("./code/basis_functions/get_phenotype.R")
 
 #------------------ Get the specimens data (UV) -------------------------------------
 
-pc = "./data/pca_embeddings_UV.csv"
+pc = "./data/pca_embeddings_pythoncalib_retrained.csv"
 lvl = "sp"
 if (lvl == "form"){
   adp=T
@@ -128,8 +128,148 @@ meanphen = rbind(meanphen_FD,meanphen_FV,meanphen_MD,meanphen_MV)
 data = rbind(data_FD,data_FV,data_MD,data_MV)
 
 
+#-------------------CCA--------------------------------------------
+meanphen=meanphen[rownames(meanphen_grayscale),]
+# Step 1: Standardize the data
+X_scaled <- scale(meanphen)
+Y_scaled <- scale(meanphen_grayscale)
+
+# Step 2: Perform CCA
+cca_result <- cancor(X_scaled, Y_scaled)
+
+# # Step 3: Display results
+# cat("Canonical Correlations:\n")
+# print(cca_result$cor)
+
+# Step 4: Project data into the canonical space
+X_proj <- X_scaled %*% cca_result$xcoef  # Transformed X
+Y_proj <- Y_scaled %*% cca_result$ycoef  # Transformed Y
+
+# Step 5: Compare distances in the aligned space
+dist_X <- dist(X_proj)  # Pairwise distances in aligned space 1
+dist_Y <- dist(Y_proj)  # Pairwise distances in aligned space 2
+
+# # Example: Compute correlation between distance matrices
+# distance_correlation <- cor(as.vector(dist_X), as.vector(dist_Y))
+# cat("Distance Correlation between aligned spaces:", distance_correlation, "\n")
+
+meanphen = X_proj
+meanphen_grayscale = Y_proj
+
+# Split the dataset into 4 based on the suffix pattern (no suffix, then 1, 2, 3)
+split_datasets <- function(dataset) {
+  # Identify rows with no suffix or numeric suffix
+  row_suffixes <- ifelse(grepl("\\d$", rownames(dataset)),
+                         sub(".*(\\d)$", "\\1", rownames(dataset)),
+                         "0")
+  
+  # Split the dataset based on the suffix
+  split_data <- split(as.data.frame(dataset), row_suffixes)
+  
+  # Process each subset: ensure it's a data frame and clean rownames/colnames
+  result <- lapply(split_data, function(df) {
+    df <- as.matrix(df)  # Ensure the subset is a matrix
+    # Remove the numeric suffix from rownames
+    rownames(df) <- gsub("\\d$", "", rownames(df))
+    # Rename columns to coord0, coord1, ...
+    colnames(df) <- paste0("coord", seq_len(ncol(df)) - 1)
+    return(df)
+  })
+  
+  return(result)
+}
+
+# Applying the function to your dataset
+datasets <- split_datasets(meanphen)
+
+# Access the individual datasets
+meanphen_FD <- as.data.frame(datasets[["0"]])  # Rows with no suffix
+meanphen_FV <- as.data.frame(datasets[["1"]])
+meanphen_MD <- as.data.frame(datasets[["2"]])
+meanphen_MV <- as.data.frame(datasets[["3"]])
+
+# Applying the function to your dataset
+datasets <- split_datasets(meanphen_grayscale)
+
+# Access the individual datasets
+meanphen_FD_grayscale <- as.data.frame(datasets[["0"]])  # Rows with no suffix
+meanphen_FV_grayscale <- as.data.frame(datasets[["1"]])
+meanphen_MD_grayscale <- as.data.frame(datasets[["2"]])
+meanphen_MV_grayscale <- as.data.frame(datasets[["3"]])
+
+
+
+# #------------Procrustes-----------------
+# meanphen=meanphen[rownames(meanphen_grayscale),]
+# # Step 1: Standardize the data
+# X_scaled <- scale(meanphen)
+# Y_scaled <- scale(meanphen_grayscale)
+# 
+# # Step 2: Perform CCA
+# proc_result <- procrustes(X_scaled, Y_scaled)
+# 
+# # # Step 3: Display results
+# # cat("Canonical Correlations:\n")
+# # print(cca_result$cor)
+# 
+# # Step 4: Project data into the canonical space
+# X_proj <- proc_result$X  # Transformed X
+# Y_proj <- proc_result$Y  # Transformed Y
+# 
+# # Step 5: Compare distances in the aligned space
+# dist_X <- dist(X_proj)  # Pairwise distances in aligned space 1
+# dist_Y <- dist(Y_proj)  # Pairwise distances in aligned space 2
+# 
+# # # Example: Compute correlation between distance matrices
+# # distance_correlation <- cor(as.vector(dist_X), as.vector(dist_Y))
+# # cat("Distance Correlation between aligned spaces:", distance_correlation, "\n")
+# 
+# meanphen = X_proj
+# meanphen_grayscale = Y_proj
+# 
+# # Split the dataset into 4 based on the suffix pattern (no suffix, then 1, 2, 3)
+# split_datasets <- function(dataset) {
+#   # Identify rows with no suffix or numeric suffix
+#   row_suffixes <- ifelse(grepl("\\d$", rownames(dataset)),
+#                          sub(".*(\\d)$", "\\1", rownames(dataset)),
+#                          "0")
+# 
+#   # Split the dataset based on the suffix
+#   split_data <- split(as.data.frame(dataset), row_suffixes)
+# 
+#   # Process each subset: ensure it's a data frame and clean rownames/colnames
+#   result <- lapply(split_data, function(df) {
+#     df <- as.matrix(df)  # Ensure the subset is a matrix
+#     # Remove the numeric suffix from rownames
+#     rownames(df) <- gsub("\\d$", "", rownames(df))
+#     # Rename columns to coord0, coord1, ...
+#     colnames(df) <- paste0("coord", seq_len(ncol(df)) - 1)
+#     return(df)
+#   })
+# 
+#   return(result)
+# }
+# 
+# # Applying the function to your dataset
+# datasets <- split_datasets(meanphen)
+# 
+# # Access the individual datasets
+# meanphen_FD <- as.data.frame(datasets[["0"]])  # Rows with no suffix
+# meanphen_FV <- as.data.frame(datasets[["1"]])
+# meanphen_MD <- as.data.frame(datasets[["2"]])
+# meanphen_MV <- as.data.frame(datasets[["3"]])
+# 
+# # Applying the function to your dataset
+# datasets <- split_datasets(meanphen_grayscale)
+# 
+# # Access the individual datasets
+# meanphen_FD_grayscale <- as.data.frame(datasets[["0"]])  # Rows with no suffix
+# meanphen_FV_grayscale <- as.data.frame(datasets[["1"]])
+# meanphen_MD_grayscale <- as.data.frame(datasets[["2"]])
+# meanphen_MV_grayscale <- as.data.frame(datasets[["3"]])
+
 #------------------ Compare rates of evolution ---------------------------------
-sex="M" #Change this parameter to test for males or females
+sex="F" #Change this parameter to test for males or females
 
 if (sex=="M"){
   meanphen_D_vis = meanphen_MD
