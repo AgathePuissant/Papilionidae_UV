@@ -87,6 +87,13 @@ GIC(bm) ; GIC(ou) ; GIC(eb) ; GIC(lam_MV)
 
 lam_MV
 
+library(motmot)
+subtree_lam1 = transformPhylo(subtree, model="lambda", lambda = lam_MV$param)
+
+resbm = mvBM(subtree_lam1, as.matrix(meanphen_MV_grayscale), method="pic")
+resbm
+mean(diag(resbm$sigma))
+
 
 bm = mvgls(as.matrix(meanphen_MD_grayscale)~1, tree=subtree, model="BM")
 ou = mvgls(as.matrix(meanphen_MD_grayscale)~1, tree=subtree, model="OU")
@@ -98,8 +105,67 @@ GIC(bm) ; GIC(ou) ; GIC(eb) ; GIC(lam_MD)
 
 lam_MD
 
+library(motmot)
+subtree_lam2 = transformPhylo(subtree, model="lambda", lambda = lam_MD$param)
+
+resbm2 = mvBM(subtree_lam2, as.matrix(meanphen_MD_grayscale), method="pic")
+resbm2
+mean(diag(resbm2$sigma))
+
+
+
+mean(diag(resbm$sigma))/mean(diag(resbm2$sigma))
 
 #-----------------------------------
+
+# Set up libraries
+library(geiger) # For phylogenetic operations
+library(motmot) # For evolutionary rate calculations
+library(mvMORPH) # For multivariate Brownian Motion and OU models
+
+# Define parameters
+n_perm <- 100  # Number of permutations
+observed_ratio <- mean(diag(resbm$sigma)) / mean(diag(resbm2$sigma))  # Observed ratio
+
+# Initialize storage for null ratios
+null_ratios <- numeric(n_perm)
+
+
+
+# Permutation loop
+for (i in 1:n_perm) {
+  print(i)
+  # Permute phenotypic data
+  permuted_meanphen_MV <- meanphen_MV_grayscale[sample(1:nrow(meanphen_MV_grayscale)), ]
+  rownames(permuted_meanphen_MV) = rownames(meanphen_MV_grayscale)
+  permuted_meanphen_MD <- meanphen_MD_grayscale[sample(1:nrow(meanphen_MD_grayscale)), ]
+  rownames(permuted_meanphen_MD) = rownames(meanphen_MD_grayscale)
+  
+  # Recalculate lambda-transformed trees
+  perm_tree_mv <- transformPhylo(subtree, model="lambda", lambda = lam_MV$param)
+  perm_tree_md <- transformPhylo(subtree, model="lambda", lambda = lam_MD$param)
+  
+  # Recalculate evolutionary rates
+  perm_resbm_mv <- mvBM(perm_tree_mv, as.matrix(permuted_meanphen_MV), method="pic")
+  perm_resbm_md <- mvBM(perm_tree_md, as.matrix(permuted_meanphen_MD), method="pic")
+  
+  # Calculate ratio of rates and store
+  null_ratios[i] <- mean(diag(perm_resbm_mv$sigma)) / mean(diag(perm_resbm_md$sigma))
+}
+
+# Compare observed ratio to null distribution
+p_value <- sum(null_ratios[null_ratios>0] >= observed_ratio) / n_perm
+
+# Output results
+cat("Observed ratio:", observed_ratio, "\n")
+cat("P-value:", p_value, "\n")
+
+# Visualize null distribution
+hist(null_ratios, main="Null Distribution of Ratios", xlab="Rate Ratio", col="gray")
+abline(v = observed_ratio, col = "red", lwd = 2, lty = 2)  # Add observed ratio line
+
+
+#----------------------------
 
 
 subtree = match.phylo.data(subtree, meanphen_FV_grayscale)$phy
@@ -113,6 +179,13 @@ GIC(bm) ; GIC(ou) ; GIC(eb) ; GIC(lam_FV)
 
 lam_FV
 
+library(motmot)
+subtree_lam1 = transformPhylo(subtree, model="lambda", lambda = lam_FV$param)
+
+resbm = mvBM(subtree_lam1, as.matrix(meanphen_FV_grayscale), method="pic")
+resbm
+mean(diag(resbm$sigma))
+
 
 bm = mvgls(as.matrix(meanphen_FD_grayscale)~1, tree=subtree, model="BM")
 ou = mvgls(as.matrix(meanphen_FD_grayscale)~1, tree=subtree, model="OU")
@@ -124,6 +197,16 @@ GIC(bm) ; GIC(ou) ; GIC(eb) ; GIC(lam_FD)
 
 lam_FD
 
+library(motmot)
+subtree_lam2 = transformPhylo(subtree, model="lambda", lambda = lam_FD$param)
+
+resbm2 = mvBM(subtree_lam2, as.matrix(meanphen_FD_grayscale), method="pic")
+resbm2
+mean(diag(resbm2$sigma))
+
+
+
+mean(diag(resbm$sigma))/mean(diag(resbm2$sigma))
 
 
 lam_MD$param ; lam_MV$param
