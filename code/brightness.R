@@ -113,8 +113,11 @@ names(x2) <- data_grayscale[data_grayscale$view=="V" & data_grayscale$sex=="M",,
 
 matching = match.phylo.data(subtree,x1)
 subtree_analysis = matching$phy
-x1 = matching$data
-x2 = x2[names(x1)]
+# x1 = matching$data
+# x2 = x2[names(x1)]
+
+x2 = x2[names(x2) %in% subtree_analysis$tip.label]
+x1 = x1[names(x1) %in% subtree_analysis$tip.label]
 
 phyl.pairedttest(subtree_analysis, x1,x2)
 pval = phyl.pairedttest(subtree_analysis, x1,x2)$P.dbar*4
@@ -141,8 +144,11 @@ names(x2) <- data_grayscale[data_grayscale$view=="V" & data_grayscale$sex=="F",,
 
 matching = match.phylo.data(subtree,x2)
 subtree_analysis = matching$phy
-x2 = matching$data
-x1 = x1[names(x2)]
+# x2 = matching$data
+# x1 = x1[names(x2)]
+
+x2 = x2[names(x2) %in% subtree_analysis$tip.label]
+x1 = x1[names(x1) %in% subtree_analysis$tip.label]
 
 phyl.pairedttest(subtree_analysis, x1,x2)
 pval = phyl.pairedttest(subtree_analysis, x1,x2)$P.dbar*4
@@ -168,12 +174,15 @@ names(x2) <- data_grayscale[data_grayscale$view=="D" & data_grayscale$sex=="M",,
 
 matching = match.phylo.data(subtree,x2)
 subtree_analysis = matching$phy
-x2 = matching$data
-x1 = x1[names(x2)]
-x1=x1[!is.na(x1)]
-x2 = x2[names(x1)]
-matching = match.phylo.data(subtree,x2)
-subtree_analysis = matching$phy
+# x2 = matching$data
+# x1 = x1[names(x2)]
+# x1=x1[!is.na(x1)]
+# x2 = x2[names(x1)]
+# matching = match.phylo.data(subtree,x2)
+# subtree_analysis = matching$phy
+
+x2 = x2[names(x2) %in% subtree_analysis$tip.label]
+x1 = x1[names(x1) %in% subtree_analysis$tip.label]
 
 phyl.pairedttest(subtree_analysis, x1,x2)
 pval = phyl.pairedttest(subtree_analysis, x1,x2)$P.dbar*4
@@ -199,12 +208,15 @@ names(x2) <- data_grayscale[data_grayscale$view=="V" & data_grayscale$sex=="M",,
 
 matching = match.phylo.data(subtree,x2)
 subtree_analysis = matching$phy
-x2 = matching$data
-x1 = x1[names(x2)]
-x1=x1[!is.na(x1)]
-x2 = x2[names(x1)]
-matching = match.phylo.data(subtree,x2)
-subtree_analysis = matching$phy
+# x2 = matching$data
+# x1 = x1[names(x2)]
+# x1=x1[!is.na(x1)]
+# x2 = x2[names(x1)]
+# matching = match.phylo.data(subtree,x2)
+# subtree_analysis = matching$phy
+
+x2 = x2[names(x2) %in% subtree_analysis$tip.label]
+x1 = x1[names(x1) %in% subtree_analysis$tip.label]
 
 phyl.pairedttest(subtree_analysis, x1,x2)
 pval = phyl.pairedttest(subtree_analysis, x1,x2)$P.dbar*4

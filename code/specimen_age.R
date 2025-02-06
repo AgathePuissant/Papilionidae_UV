@@ -9,6 +9,7 @@ library(phytools)
 library(RColorBrewer)
 library(lme4)
 library(AICcmodavg)
+library(multcomp)
 
 source("./code/basis_functions/match_tree.R")
 source("./code/basis_functions/get_phenotype.R")
@@ -92,13 +93,14 @@ data_grayscale$collection_date = ages[match(data_grayscale$id,ages$id),]$collect
 
 data_lme = data_grayscale
 
-data_lme$specimen_age = 2024 - data_lme$collection_date
+data_lme$specimen_age = 2025 - data_lme$collection_date
 
 data_lme = data_lme[!is.na(data_lme$collection_date),,drop=F]
 
 model_mixed <- lmer(meanb~specimen_age+(1|tipsgenre),
                     data=data_lme,
                     REML = F)
+
 summary(model_mixed) 
 
 null_model = lmer(meanb~1+(1|tipsgenre),
@@ -108,3 +110,17 @@ null_model = lmer(meanb~1+(1|tipsgenre),
 AICcmodavg::AICc(null_model, return.K = F, second.ord=F) - AICcmodavg::AICc(model_mixed, return.K = F, second.ord=F)
 
 confint(model_mixed)
+
+#--------- phylogenetic ANCOVA to test for differences in brightness while accounting for specimen age --------------
+
+data_lme$group = as.factor(paste0(data_lme$sex,data_lme$view))
+
+corBM<-corBrownian(phy=subtree,form=~tipsgenre)
+
+brightness.ancova<-gls(meanb~group+specimen_age,data=data_lme,
+                    correlation=corBM)
+
+summary(brightness.ancova)
+
+post.hoc<-glht(brightness.ancova,linfct=mcp(group="Tukey"))
+summary(post.hoc)

@@ -16,7 +16,8 @@ source("./code/basis_functions/get_phenotype.R")
 
 #------------------ Get the specimens data (UV) -------------------------------------
 
-pc = "./data/pca_embeddings_pythoncalib_retrained.csv"
+pc = "./data/pca_embeddings_UV.csv"
+# pc = "./data/pca_embeddings_retrained.csv"
 lvl = "sp"
 if (lvl == "form"){
   adp=T
@@ -83,16 +84,16 @@ subtree = match.phylo.data(subtree,meanphen_MD_grayscale)$phy
 
 sis=extract_sisters(subtree)
 
-MD = create_distpheno(meanphen_MD,"M","D", level=lvl)
+MD = create_distpheno(meanphen_MD,"M","D", level=lvl, sister = T)
 MD$sex="M"
 MD$view="D"
-MV = create_distpheno(meanphen_MV,"M","V", level=lvl)
+MV = create_distpheno(meanphen_MV,"M","V", level=lvl, sister = T)
 MV$sex="M"
 MV$view="V"
-FD = create_distpheno(meanphen_FD,"F","D", level=lvl)
+FD = create_distpheno(meanphen_FD,"F","D", level=lvl, sister = T)
 FD$sex="F"
 FD$view="D"
-FV = create_distpheno(meanphen_FV,"F","V", level=lvl)
+FV = create_distpheno(meanphen_FV,"F","V", level=lvl, sister = T)
 FV$sex="F"
 FV$view="V"
 
@@ -158,25 +159,20 @@ meanphen_FV = meanphen_FV[rownames(meanphen_FV_grayscale),]
 meanphen_MD = meanphen_MD[rownames(meanphen_MD_grayscale),]
 meanphen_MV = meanphen_MV[rownames(meanphen_MV_grayscale),]
 
-# meanphen_FD = meanphen_FD[rownames(meanphen_FD) %in% list_sp$x,,F]
-# meanphen_FV = meanphen_FV[rownames(meanphen_FV) %in% list_sp$x,,F]
-# meanphen_MD = meanphen_MD[rownames(meanphen_MD) %in% list_sp$x,,F]
-# meanphen_MV = meanphen_MV[rownames(meanphen_MV) %in% list_sp$x,,F]
-
 
 
 #------------------ Compute pairwise distance in visible -----------------------
 
-MD = create_distpheno(meanphen_MD,"M","D", level=lvl)
+MD = create_distpheno(meanphen_MD,"M","D", level=lvl, sister = T)
 MD$sex="M"
 MD$view="D"
-MV = create_distpheno(meanphen_MV,"M","V", level=lvl)
+MV = create_distpheno(meanphen_MV,"M","V", level=lvl, sister = T)
 MV$sex="M"
 MV$view="V"
-FD = create_distpheno(meanphen_FD,"F","D", level=lvl)
+FD = create_distpheno(meanphen_FD,"F","D", level=lvl, sister = T)
 FD$sex="F"
 FD$view="D"
-FV = create_distpheno(meanphen_FV,"F","V", level=lvl)
+FV = create_distpheno(meanphen_FV,"F","V", level=lvl, sister = T)
 FV$sex="F"
 FV$view="V"
 
@@ -195,23 +191,8 @@ MF_visible = MF_visible[match(paste(MF_grayscale$Var1,MF_grayscale$Var2,MF_grays
 MF_grayscale$visdist = MF_visible[match(paste(MF_grayscale$Var1,MF_grayscale$Var2,MF_grayscale$sex,MF_grayscale$view),paste(MF_visible$Var1,MF_visible$Var2,MF_visible$sex,MF_visible$view)),]$value
 MF_grayscale = MF_grayscale[MF_grayscale$Var1!=MF_grayscale$Var2,]
 
-MF_grayscale$value <- scale(MF_grayscale$value)
-MF_grayscale$visdist <- scale(MF_grayscale$visdist)
-
-
-# MF_grayscale = MF_grayscale[MF_grayscale$Var1!="Protesilaus_molops",,F]
 
 #GLM
 model<-glm(value~(visdist+overlap+distphylo):sex:view, data=MF_grayscale)
 
 summary(model)
-
-
-#-------------------------------------------------------------------------------
-
-ggplot(MF_grayscale[(MF_grayscale$view=="V") & (MF_grayscale$sex=="M"),],aes(x=overlap, y=value, label=Var1))+
-  geom_point()+
-  geom_text(size=2)
-
-
-# id_toretain = paste0(data_UV[((data_UV$tipsgenre %in% sis$sp1) | (data_UV$tipsgenre %in% sis$sp2)) & (data_UV$sex == "M"),]$id, "V.jpg")

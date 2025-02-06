@@ -2,7 +2,8 @@ embeddings_pythoncalib <- read.csv("data/embeddings_UVretrained.csv",sep=";")
 
 rownames(embeddings_pythoncalib) = paste0(embeddings_pythoncalib$id,embeddings_pythoncalib$view)
 
-embeddings_pythoncalib =embeddings_pythoncalib[,c(-2:-1)]
+embeddings_pythoncalib$id=NULL
+embeddings_pythoncalib$view=NULL
 
 distpheno = as.matrix(dist(embeddings_pythoncalib))
 distpheno = melt(distpheno)
