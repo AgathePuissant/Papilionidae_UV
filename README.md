@@ -1,5 +1,7 @@
 # UV wing pattern diversification in Papilionidae
 
+[![DOI](https://zenodo.org/badge/741506891.svg)](https://doi.org/10.5281/zenodo.14918991)
+
 This repository contains the R code to run statistical analysis on phenotypic coordinates of UV wing colour pattern of 77 Papilionidae species.
 
 Within the code folder :
