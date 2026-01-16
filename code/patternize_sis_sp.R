@@ -33,7 +33,7 @@ if (mode=="UV"){
   
   imageList <- makeList(IDlist, 'image', prepath, extension)
   
-  pc = "./data/pca_embeddings_UV_match_all.csv"
+  pc = "./data/pca_embeddings_UV.csv"
   lvl = "sp"
   if (lvl == "form"){
     adp=T
@@ -42,7 +42,7 @@ if (mode=="UV"){
   }
   
   
-  list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
+  list_get_phenotype = get_phenotype(c("F"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
   meanphen <- list_get_phenotype[[1]]
   data_FD <- list_get_phenotype[[2]]
   sp_data <- list_get_phenotype[[4]]
@@ -52,7 +52,7 @@ if (mode=="UV"){
   list_match <- match_tree(meanphen_match = meanphen, data_match = data_FD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
   subtree <- list_match[[1]]
   
-  list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
+  list_get_phenotype = get_phenotype(c("F"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
   meanphen <- list_get_phenotype[[1]]
   data_FV <- list_get_phenotype[[2]]
   sp_data <- list_get_phenotype[[4]]
@@ -61,7 +61,7 @@ if (mode=="UV"){
   list_match <- match_tree(meanphen_match = meanphen, data_match = data_FV, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
   subtree <- list_match[[1]]
   
-  list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
+  list_get_phenotype = get_phenotype(c("M"),c("D"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
   meanphen <- list_get_phenotype[[1]]
   data_MD <- list_get_phenotype[[2]]
   sp_data <- list_get_phenotype[[4]]
@@ -71,7 +71,7 @@ if (mode=="UV"){
   list_match <- match_tree(meanphen_match = meanphen, data_match = data_MD, add_poly=adp, tree_path = "./data/Papilionidae_MCC_clean.tre")
   subtree <- list_match[[1]]
   
-  list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV_pythoncalib.csv",path_coords = pc, reduce_dataset=T)
+  list_get_phenotype = get_phenotype(c("M"),c("V"), mode = 'mean', level = lvl, path_data_photos = "./data/data_photos_UV.csv",path_coords = pc, reduce_dataset=T)
   meanphen <- list_get_phenotype[[1]]
   data_MV <- list_get_phenotype[[2]]
   sp_data <- list_get_phenotype[[4]]
@@ -97,7 +97,7 @@ if (mode=="UV"){
   
   imageList <- makeList(IDlist, 'image', prepath, extension)
   
-  pc="./data/pca_embeddings_match_all.csv"
+  pc="./data/pca_embeddings.csv"
   lvl = "sp"
   if (lvl == "form"){
     adp=T
@@ -154,8 +154,7 @@ vec_nk = c() #To store number of color for segmentation of visible light images
 
 
 #Prepare the dataframe to receive the results
-# sis=extract_sisters(subtree)
-sis=read.table("./data/sis_list.csv", head=T,sep=";",row.names = 1)
+sis=extract_sisters(subtree)
 colnames(sis) <- c("sp1","sp2")
 
 listpatternize =list()
